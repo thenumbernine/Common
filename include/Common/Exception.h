@@ -5,6 +5,8 @@
 #include <sstream>
 #include <exception>
 
+namespace Common {
+
 class Exception : public std::exception {
 protected:
 	std::ostringstream s;
@@ -29,4 +31,6 @@ public:
 inline std::ostream &operator<<(std::ostream &s, const Exception &t) {
 	return s << t.what();
 }
+
+};
 

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Common {
+
 template<typename T>
 class Singleton {
 protected:
@@ -30,5 +32,7 @@ public:
 		validate();
 		return t;
 	}
+};
+
 };
 

@@ -2,6 +2,8 @@
 
 #include <functional>
 
+namespace Common {
+
 class Finally {
 public:
 	typedef std::function<void()> Callback;
@@ -14,3 +16,4 @@ public:
 	}
 };
 
+};

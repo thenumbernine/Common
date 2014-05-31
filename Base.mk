@@ -1,4 +1,6 @@
-PATH_TO_HERE=$(dir $(lastword $(MAKEFILE_LIST)))
+# the base of the build system -- everything includes this first
+
+COMMON_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
 
 buildVar = \
 	$($(1)_$(PLATFORM))\
@@ -23,8 +25,7 @@ OBJDIR=$(OBJDIR_BASE)/$(PLATFORM)/$(BUILD)
 OBJPATHS=$(addprefix $(OBJDIR)/, $(OBJECTS))
 
 INCLUDE=include
-INCLUDE+=$(PATH_TO_HERE)/include
-INCLUDE_app=$(PATH_TO_HERE)/../GLApp/include
+INCLUDE+=$(COMMON_PATH)include
 
 MACROS=PLATFORM_$(PLATFORM) BUILD_$(BUILD)
 MACROS_debug=DEBUG
@@ -35,12 +36,11 @@ CFLAGS=-c -Wall -std=c++11
 CFLAGS_debug=-O0 -mfix-and-continue -gdwarf-2
 CFLAGS_release=-O3
 
-LIBS_app=GLApp SDL2 SDL2main
-LIBPATHS_app=$(PATH_TO_HERE)/../GLApp/dist/$(PLATFORM)/$(BUILD)
+#LIBPATHS
+#LIBS
 
 LD=clang++
 LDFLAGS_lib=-dynamiclib -undefined suppress -flat_namespace
-LDFLAGS_app= -framework Cocoa -framework OpenGL
 
 .PHONY: default
 default: all
@@ -75,9 +75,6 @@ DIST_SUFFIX_osx_lib=.dylib
 DIST=$(call concat,$(DISTDIR)/$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 .PHONY: builddist
-builddist: 
-	@echo done with $(DIST)
-	@echo
 builddist: CFLAGS+= $(call buildVar,CFLAGS)
 builddist: CFLAGS+= $(addprefix -I,$(INCLUDE) $(call buildVar,INCLUDE))
 builddist: CFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
@@ -85,6 +82,9 @@ builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
 builddist: LDFLAGS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
 builddist: LDFLAGS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
 builddist: $(DIST)
+builddist: 
+	@echo done with $(DIST)
+	@echo
 
 $(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(HEADERS)
 	-mkdir -p $(@D)
