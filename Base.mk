@@ -51,7 +51,8 @@ DIST_SUFFIX_osx_app=.app/Contents/MacOS/$(DIST_FILENAME)
 DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 LD=clang++
-LDFLAGS_lib=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
+LDFLAGS_lib+=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
+LDFLAGS_app+=-Wl,-headerpad_max_install_names
 
 .PHONY: default
 default: all
