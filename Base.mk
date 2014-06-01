@@ -43,8 +43,15 @@ CFLAGS_release=-O3
 #DYNAMIC_LIBS
 #STATIC_LIBS	<- haven't got this just yet
 
+DISTDIR_BASE=dist
+DISTDIR=$(DISTDIR_BASE)/$(PLATFORM)/$(BUILD)
+DIST_PREFIX_osx_lib=lib
+DIST_SUFFIX_osx_lib=.dylib
+DIST_SUFFIX_osx_app=.app/Contents/MacOS/$(DIST_FILENAME)
+DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
+
 LD=clang++
-LDFLAGS_lib=-dynamiclib -undefined suppress -flat_namespace
+LDFLAGS_lib=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 .PHONY: default
 default: all
@@ -71,13 +78,6 @@ $(PLATFORM)_debug:
 .PHONY: $(PLATFORM)_release
 $(PLATFORM)_release:
 	$(MAKE) BUILD="release" post_builddist_$(PLATFORM)
-
-DISTDIR_BASE=dist
-DISTDIR=$(DISTDIR_BASE)/$(PLATFORM)/$(BUILD)
-DIST_PREFIX_osx_lib=lib
-DIST_SUFFIX_osx_lib=.dylib
-DIST_SUFFIX_osx_app=.app/Contents/MacOS/$(DIST_FILENAME)
-DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 .PHONY: post_builddist_$(PLATFORM)
 post_builddist_$(PLATFORM): post_builddist_$(PLATFORM)_$(DIST_TYPE)
@@ -125,18 +125,11 @@ post_builddist_osx_app:
 	@for file in $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS); \
 	do \
 		cp $$file $(dir $(DIST))../Resources/lib; \
-		install_name_tool -change \
-			$$file \
-			\@executable_path/../Resources/lib/`basename $$file` \
-			$(DIST); \
+		install_name_tool -change $$file \@executable_path/../Resources/lib/`basename $$file` $(DIST); \
+		install_name_tool -change \@rpath/`basename $$file` \@executable_path/../Resources/lib/`basename $$file` $(DIST); \
 	done;
 	@echo done with $(DIST)
 	@echo
-
-# NOTICE the install_name_tool assumes the directory before dist matches the base name of the library
-#  it would be good to know how it is that install tool chooses the dir
-#  GLApp/test gives us 				dist/$(PLATFORM)/$(BUILD)/`basename $$file`
-# anything one root down gives us 	../$(SOMEDIR)/dist/$(PLATFORM)/$(BUILD)/`base $$file`
 
 .PHONY: builddist
 builddist: CFLAGS+= $(call buildVar,CFLAGS)
@@ -145,7 +138,7 @@ builddist: CFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
 builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
 builddist: LDFLAGS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
 builddist: LDFLAGS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
-builddist: LDFLAGS+= $(DYNAMIC_LIBS)
+builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
 builddist: $(DIST)
 
 $(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(HEADERS)
