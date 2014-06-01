@@ -121,13 +121,12 @@ post_builddist_osx_app:
 	@echo '</plist>' >> $(dir $(DIST))../Info.plist
 	
 	-mkdir -p $(dir $(DIST))../Resources/lib
+	-cp -R res/* $(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)).app/Contents/Resources/
 	@for file in $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS); \
 	do \
 		cp $$file $(dir $(DIST))../Resources/lib; \
-		echo FIXING ../`basename $$file`/dist/$(PLATFORM)/$(BUILD)/`basename $$file`; \
-		install_name_tool \
-			-change \
-			dist/$(PLATFORM)/$(BUILD)/`basename $$file` \
+		install_name_tool -change \
+			$$file \
 			\@executable_path/../Resources/lib/`basename $$file` \
 			$(DIST); \
 	done;

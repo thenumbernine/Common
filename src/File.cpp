@@ -12,5 +12,9 @@ std::string File::read(std::string filename) {
 	return std::string(buf.begin(), buf.end());
 }
 
+void File::write(std::string filename, std::string data) {
+	std::ofstream(filename) << data;
+}
+
 };
 
