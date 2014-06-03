@@ -142,7 +142,7 @@ builddist: LDFLAGS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
 builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
 builddist: $(DIST)
 
-$(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(HEADERS)
+$(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell find $(file) -type f))
 	-mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
