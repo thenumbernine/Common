@@ -67,18 +67,18 @@ help:
 
 .PHONY: osx
 osx:
-	$(MAKE) PLATFORM="osx" build_platform
+	$(MAKE) PLATFORM=osx build_platform
 
 .PHONY: build_platform
 build_platform: $(PLATFORM)_debug $(PLATFORM)_release
 
 .PHONY: $(PLATFORM)_debug
 $(PLATFORM)_debug:
-	$(MAKE) BUILD="debug" post_builddist_$(PLATFORM)
+	$(MAKE) BUILD=debug post_builddist_$(PLATFORM)
 
 .PHONY: $(PLATFORM)_release
 $(PLATFORM)_release:
-	$(MAKE) BUILD="release" post_builddist_$(PLATFORM)
+	$(MAKE) BUILD=release post_builddist_$(PLATFORM)
 
 .PHONY: post_builddist_$(PLATFORM)
 post_builddist_$(PLATFORM): post_builddist_$(PLATFORM)_$(DIST_TYPE)
