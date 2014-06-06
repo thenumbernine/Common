@@ -16,5 +16,19 @@ void File::write(std::string filename, std::string data) {
 	std::ofstream(filename) << data;
 }
 
+std::string File::getExtension(std::string filename) {
+	std::string::size_type i = filename.rfind('.');
+	if (i == std::string::npos) return filename;
+	return filename.substr(i+1);
+}
+
+bool File::exists(std::string filename) {
+	return std::ifstream(filename).good();
+}
+
+void File::remove(std::string filename) {
+	std::remove(filename.c_str());
+}
+
 };
 
