@@ -7,22 +7,19 @@ using namespace std;
 
 //for-loop
 
+template<int index>
 struct TestEq {
-	typedef Function<void(int, char)>::Type A;
-	typedef TypeVector<int, char> B;
-	
-	template<int index>
-	struct Exec {
-		static bool exec(int i) { 
-			TEST_EQ(std::is_same<Function<A>::Arg<index> COMMA B::Get<index>>::value, 1);
-			return false;
-		}
-	};
+	static bool exec(int i) { 
+		typedef Function<void(int, char)>::Type A;
+		typedef TypeVector<int, char> B;
+		TEST_EQ(std::is_same<Function<A>::Arg<index> COMMA B::Get<index>>::value, 1);
+		return false;
+	}
 };
 
 void testForLoop() {
 	ForLoop<0, 2, TestEq>::exec(1);
-	TEST_EQ(std::is_same<Function<decltype(TestEq::Exec<0>::exec)>::Arg<0> COMMA int>::value, 1);
+	TEST_EQ(std::is_same<Function<decltype(TestEq<0>::exec)>::Arg<0> COMMA int>::value, 1);
 }
 
 int test(double, char) { return 0; }
