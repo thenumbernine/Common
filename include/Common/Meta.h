@@ -85,25 +85,19 @@ struct Function<Return_(ArgList...)> {
 
 //for loop
 
-template<int index, int end, typename Op>
+template<int index, int end, template<int> class Exec>
 struct ForLoop {
-	//compile-time for-loop callback function
-	//return 'true' to break the loop
-	//with loop unrolling already built into compilers, 
-	// this for-loop metaprogram probably is slower than an ordinary for-loop 
-	typedef typename Function<decltype(Op::template Exec<0>::exec)>::template Arg<0> Input;
-	//it would be cool to extract all parameters from Exec, and not just the first ...
-	static bool exec(Input input) {
-		typedef typename Op::template Exec<index> Exec;
-		if (Exec::exec(input)) return true;
-		return ForLoop<index+1,end,Op>::exec(input);
+	template<typename... InputArgs>
+	static bool exec(InputArgs&&... input) {
+		if (Exec<index>::exec(std::forward<InputArgs>(input)...)) return true;
+		return ForLoop<index+1,end,Exec>::exec(std::forward<InputArgs>(input)...);
 	}
 };
 
-template<int end, typename Op>
-struct ForLoop<end, end, Op> {
-	typedef typename Function<decltype(Op::template Exec<0>::exec)>::template Arg<0> Input;
-	static bool exec(Input input) {
+template<int end, template<int> class Exec>
+struct ForLoop<end, end, Exec> {
+	template<typename... InputArgs>
+	static bool exec(InputArgs&&... input) {
 		return false;
 	}
 };
