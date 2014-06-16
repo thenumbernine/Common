@@ -5,11 +5,11 @@
 namespace Common {
 
 struct File {
-	static std::string read(std::string filename);
-	static void write(std::string filename, std::string data);
-	static std::string getExtension(std::string filename);
-	static bool exists(std::string filename);
-	static void remove(std::string filename);
+	static std::string read(const std::string& filename);
+	static void write(const std::string& filename, const std::string& data);
+	static std::string getExtension(const std::string& filename);
+	static bool exists(const std::string& filename);
+	static void remove(const std::string& filename);
 };
 
 };
