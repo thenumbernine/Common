@@ -47,7 +47,6 @@ struct GetTypeVector<0, Arg> {
 	typedef Arg Type;
 };
 
-
 template<typename... Args>
 struct TypeVector;
 
@@ -65,6 +64,16 @@ struct TypeVector<Arg, Args...> {
 
 	template<int index>
 	using Get = typename GetTypeVector<index, Arg, Args...>::Type;
+};
+
+//type concat
+
+template<typename Arg1, typename Arg2>
+struct ConcatTypeVector;
+
+template<typename... Arg1, typename... Arg2>
+struct ConcatTypeVector<TypeVector<Arg1...>, TypeVector<Arg2...>> {
+	typedef TypeVector<Arg1..., Arg2...> Type;
 };
 
 //function parameters
