@@ -4,21 +4,6 @@
 
 //common metaprograms
 
-//if condition
-
-template<bool cond, typename A, typename B>
-struct If;
-
-template<typename A, typename B>
-struct If<true, A, B> {
-	typedef A Type;
-};
-
-template<typename A, typename B>
-struct If<false, A, B> {
-	typedef B Type;
-};
-
 /*
 vector of types 
 TypeVector<int, char, ...>::Get<1> is type char
@@ -30,11 +15,11 @@ struct GetTypeVector;
 
 template<int index, typename Arg, typename... Args> 
 struct GetTypeVector<index, Arg, Args...> {
-	typedef typename If<
+	typedef typename std::conditional<
 		index == 0,
 		Arg,
 		typename GetTypeVector<index-1, Args...>::Type
-	>::Type Type;
+	>::type Type;
 };
 
 template<typename Arg, typename... Args>
@@ -92,7 +77,7 @@ struct Function<Return_(ArgList...)> {
 	using Arg = typename Args::template Get<index>;
 };
 
-//for loop
+//for loop - compile-time indexes and execution of runtime code
 
 template<int index, int end, template<int> class Exec>
 struct ForLoop {
