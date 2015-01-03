@@ -1,7 +1,8 @@
 # the base of the build system -- everything includes this first
-include Config.mk
 
 COMMON_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
+
+include $(COMMON_PATH)Config.mk
 
 buildVar = \
 	$($(1)_$(PLATFORM))\
