@@ -1,2 +1,15 @@
 common classes other projects use
 also contains the base makefile for all other projects
+
+usage:
+
+	make <platform>
+
+or edit Config.mk and choose your appropriate platform, then it's just:
+
+	make
+
+also allowed:
+
+	make <platform>_debug
+	make <platform>_release

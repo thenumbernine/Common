@@ -1,0 +1,2 @@
+#PLATFORM=osx
+#PLATFORM=linux

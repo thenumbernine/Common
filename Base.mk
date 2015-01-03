@@ -1,4 +1,5 @@
 # the base of the build system -- everything includes this first
+include Config.mk
 
 COMMON_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
 
@@ -36,6 +37,8 @@ CFLAGS=-c -Wall -std=c++11
 CFLAGS_debug=-O0 -mfix-and-continue -gdwarf-2
 CFLAGS_release=-O3
 
+CFLAGS_linux_lib+=-fPIC
+
 # old fashioned unix vars:
 #LIBS
 #LIBPATHS
@@ -45,32 +48,80 @@ CFLAGS_release=-O3
 
 DISTDIR_BASE=dist
 DISTDIR=$(DISTDIR_BASE)/$(PLATFORM)/$(BUILD)
+
 DIST_PREFIX_osx_lib=lib
 DIST_SUFFIX_osx_lib=.dylib
 DIST_SUFFIX_osx_app=.app/Contents/MacOS/$(DIST_FILENAME)
+
+DIST_PREFIX_linux_lib=lib
+DIST_SUFFIX_linux_lib=.so
+DIST_SUFFIX_linux_app=
+
 DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 LD=clang++
-LDFLAGS_lib+=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
-LDFLAGS_app+=-Wl,-headerpad_max_install_names
+
+LDFLAGS_osx_lib+=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
+LDFLAGS_linux_lib+=-shared
+
+LDFLAGS_osx_app+=-Wl,-headerpad_max_install_names
 
 .PHONY: default
 default: all
 
 .PHONY: all
-all: osx
+all:
+ifndef PLATFORM
+	$(MAKE) help
+else
+	$(MAKE) build_all
+endif
 
 .PHONY: help
 help:
-	echo "make <platform>"
-	echo "platform: osx"
+	@echo
+	@echo "edit Config.mk to specify your configuration"
+	@echo " or"
+	@echo "make <platform>"
+	@echo " or"
+	@echo "make <platform>_<build>"
+	@echo
+	@echo "platform: $(PLATFORM)"
+	@echo "build: $(BUILD)"
+	@echo
+
+# build config rules
+# TODO autogen them based on a list of valid configurations
+
+.PHONY: debug
+ifndef PLATFORM
+	$(MAKE) help
+else
+	$(MAKE) $(PLATFORM)_debug
+endif
+
+.PHONY: release
+ifndef PLATFORM
+	$(MAKE) help
+else
+	$(MAKE) $(PLATFORM)_release
+endif
+
+# platform build rules are repeated for each platform.
+# TODO autogen them based on valid platform list?
 
 .PHONY: osx
 osx:
-	$(MAKE) PLATFORM=osx build_platform
+	$(MAKE) PLATFORM=osx build_all
 
-.PHONY: build_platform
-build_platform: $(PLATFORM)_debug $(PLATFORM)_release
+.PHONY: linux
+linux:
+	$(MAKE) PLATFORM=linux build_all
+
+# rest of the build process
+
+.PHONY: build_all
+build_all: $(PLATFORM)_debug $(PLATFORM)_release
 
 .PHONY: $(PLATFORM)_debug
 $(PLATFORM)_debug:
