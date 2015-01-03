@@ -94,6 +94,7 @@ help:
 # TODO autogen them based on a list of valid configurations
 
 .PHONY: debug
+debug:
 ifndef PLATFORM
 	$(MAKE) help
 else
@@ -101,6 +102,7 @@ else
 endif
 
 .PHONY: release
+release:
 ifndef PLATFORM
 	$(MAKE) help
 else
