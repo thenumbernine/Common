@@ -1,2 +1,2 @@
-#PLATFORM=osx
+PLATFORM=osx
 #PLATFORM=linux
