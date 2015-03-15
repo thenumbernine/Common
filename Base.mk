@@ -38,7 +38,7 @@ CFLAGS=-c -Wall -std=c++11
 CFLAGS_debug=-O0 -mfix-and-continue -gdwarf-2
 CFLAGS_release=-O3
 
-CFLAGS_linux_lib+=-fPIC
+CFLAGS_lib+=-fPIC
 
 # old fashioned unix vars:
 #LIBS
@@ -138,9 +138,9 @@ $(PLATFORM)_release:
 post_builddist_$(PLATFORM): post_builddist_$(PLATFORM)_$(DIST_TYPE)
 
 .PHONY: post_builddist_$(PLATFORM)_$(DIST_TYPE)
-post_builddist_$(PLATFORM)_$(DIST_TYPE): builddist
+post_builddist_$(PLATFORM)_$(DIST_TYPE):: builddist
 
-post_builddist_osx_app:
+post_builddist_osx_app::
 	@printf APPLhect > $(dir $(DIST))../PkgInfo
 	@echo '<?xml version="1.0" encoding="UTF-8"?>' > $(dir $(DIST))../Info.plist
 	@echo '<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> $(dir $(DIST))../Info.plist
