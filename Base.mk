@@ -58,6 +58,8 @@ DIST_PREFIX_linux_lib=lib
 DIST_SUFFIX_linux_lib=.so
 DIST_SUFFIX_linux_app=
 
+LIB_SUFFIX=$(DIST_SUFFIX_$(PLATFORM)_lib)
+
 DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 LDFLAGS_osx_lib+=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
