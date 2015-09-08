@@ -33,9 +33,9 @@ MACROS=PLATFORM_$(PLATFORM) BUILD_$(BUILD)
 MACROS_debug=DEBUG
 MACROS_release=NDEBUG
 
-CC=clang++
 CFLAGS=-c -Wall -std=c++11
-CFLAGS_debug=-O0 -mfix-and-continue -gdwarf-2
+CFLAGS_debug=-O0 -gdwarf-2
+CFLAGS_osx_debug=-mfix-and-continue
 CFLAGS_release=-O3
 
 CFLAGS_lib+=-fPIC
@@ -59,8 +59,6 @@ DIST_SUFFIX_linux_lib=.so
 DIST_SUFFIX_linux_app=
 
 DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
-
-LD=clang++
 
 LDFLAGS_osx_lib+=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 LDFLAGS_linux_lib+=-shared
