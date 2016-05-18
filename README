@@ -9,7 +9,13 @@ or edit Config.mk and choose your appropriate platform, then it's just:
 
 	make
 
+...to build debug and release builds.
 also allowed:
 
+	make debug
+		or
 	make <platform>_debug
+	
+	make release
+		or
 	make <platform>_release
