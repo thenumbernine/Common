@@ -16,10 +16,12 @@ buildVar = \
 space :=
 space +=
 concat = $(subst $(space),,$(strip $1))
+escapechar :=\ 
+escapechar :=$(subst $(space),,$(escapechar))
 
 SRCDIR_BASE=src
-SOURCES=$(shell find $(SRCDIR_BASE) -type f -name *.cpp)
-HEADERS=$(shell find include -type f)
+SOURCES=$(shell $(FIND) $(SRCDIR_BASE) -type f -name *.cpp)
+HEADERS=$(shell $(FIND) include -type f)
 OBJECTS=$(patsubst $(SRCDIR_BASE)/%.cpp, %.o, $(SOURCES))
 
 OBJDIR_BASE=obj
@@ -46,6 +48,7 @@ CFLAGS_lib+=-fPIC
 # newschool:
 #DYNAMIC_LIBS
 #STATIC_LIBS	<- haven't got this just yet
+LIBPATHS_osx+=$(HOME)/lib
 
 DISTDIR_BASE=dist
 DISTDIR=$(DISTDIR_BASE)/$(PLATFORM)/$(BUILD)
@@ -193,10 +196,12 @@ builddist: CFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
 builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
 builddist: LDFLAGS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
 builddist: LDFLAGS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
-builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
+builddist: LDFLAGS+= $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS)
 builddist: $(DIST)
 
-$(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell find $(file) -type f))
+#builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
+
+$(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell $(FIND) $(file) -type f))
 	-mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
