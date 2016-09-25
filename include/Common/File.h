@@ -12,5 +12,4 @@ struct File {
 	static void remove(const std::string& filename);
 };
 
-};
-
+}

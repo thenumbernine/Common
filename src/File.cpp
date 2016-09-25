@@ -1,4 +1,5 @@
 #include "Common/File.h"
+#include <fstream>
 
 namespace Common {
 

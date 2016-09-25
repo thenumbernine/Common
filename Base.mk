@@ -35,12 +35,29 @@ MACROS=PLATFORM_$(PLATFORM) BUILD_$(BUILD)
 MACROS_debug=DEBUG
 MACROS_release=NDEBUG
 
-CFLAGS=-c -Wall -std=c++11
-CFLAGS_debug=-O0 -gdwarf-2
-CFLAGS_osx_debug=-mfix-and-continue
-CFLAGS_release=-O3
+CFLAGS_osx=-c -Wall -std=c++11
+CFLAGS_osx_debug=-O0 -gdwarf-2 -mfix-and-continue
+CFLAGS_osx_release=-O3
+CFLAGS_lib_osx+=-fPIC
+CFLAG_OUTPUT_osx=-o
+CFLAG_INCLUDE_osx=-I
+CFLAG_MACRO_osx=-D
+LDFLAG_OUTPUT_osx=-o
 
-CFLAGS_lib+=-fPIC
+CFLAGS_linux=-c -Wall -std=c++11 -fPIC
+CFLAGS_linux_debug=-O0 -gdwarf-2
+CFLAGS_linux_release=-O3
+CFLAG_OUTPUT_linux=-o
+CFLAG_INCLUDE_linux=-I
+CFLAG_MACRO_linux=-D
+LDFLAG_OUTPUT_linux=-o
+
+CFLAGS_msvc=/c /EHsc
+CFLAG_OUTPUT_msvc=/Fo:
+CFLAG_INCLUDE_msvc=/I
+CFLAG_MACRO_msvc=/D
+LDFLAG_OUTPUT_msvc=/Fe:
+
 
 # old fashioned unix vars:
 #LIBS
@@ -194,20 +211,24 @@ builddist: CFLAGS+= $(call buildVar,CFLAGS)
 builddist: CFLAGS+= $(addprefix -I,$(INCLUDE) $(call buildVar,INCLUDE))
 builddist: CFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
 builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
-builddist: LDFLAGS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
-builddist: LDFLAGS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
-builddist: LDFLAGS+= $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS)
+builddist: DEPLIBS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
+builddist: DEPLIBS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
+builddist: DEPLIBS+= $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS)
 builddist: $(DIST)
 
 #builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
 
 $(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell $(FIND) $(file) -type f))
 	-mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) $(call buildVar,CFLAG_OUTPUT) $@ $<
 
+# .o files must go before their dependencies
+# but I'm adding those dependencies inside the LDFLAGS
+# so this means .o files will go before their flag definitions
+# (unless I separate the lib dependencies out of LDFLAGS ...)
 $(DIST):: $(OBJPATHS)
 	-mkdir -p $(@D)
-	$(LD) $(LDFLAGS) -o $@ $^
+	$(LD) $(LDFLAGS) $^ $(DEPLIBS) $(call buildVar,LDFLAG_OUTPUT) $@
 
 .PHONY: clean
 clean:
