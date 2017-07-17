@@ -35,7 +35,9 @@ MACROS=PLATFORM_$(PLATFORM) BUILD_$(BUILD)
 MACROS_debug=DEBUG
 MACROS_release=NDEBUG
 
-CFLAGS_osx=-c -Wall -std=c++11
+CPPVER=c++11
+
+CFLAGS_osx=-c -Wall -std=$(CPPVER)
 CFLAGS_osx_debug=-O0 -gdwarf-2 -mfix-and-continue
 CFLAGS_osx_release=-O3
 CFLAGS_lib_osx+=-fPIC
@@ -44,7 +46,7 @@ CFLAG_INCLUDE_osx=-I
 CFLAG_MACRO_osx=-D
 LDFLAG_OUTPUT_osx=-o
 
-CFLAGS_linux=-c -Wall -std=c++11 -fPIC
+CFLAGS_linux=-c -Wall -std=$(CPPVER) -fPIC
 CFLAGS_linux_debug=-O0 -gdwarf-2
 CFLAGS_linux_release=-O3
 CFLAG_OUTPUT_linux=-o
