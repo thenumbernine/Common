@@ -200,7 +200,9 @@ post_builddist_osx_app::
 	@for file in $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS); \
 	do \
 		cp $$file $(dir $(DIST))../Resources/lib; \
+		echo install_name_tool -change $$file \@executable_path/../Resources/lib/`basename $$file` $(DIST); \
 		install_name_tool -change $$file \@executable_path/../Resources/lib/`basename $$file` $(DIST); \
+		echo install_name_tool -change \@rpath/`basename $$file` \@executable_path/../Resources/lib/`basename $$file` $(DIST); \
 		install_name_tool -change \@rpath/`basename $$file` \@executable_path/../Resources/lib/`basename $$file` $(DIST); \
 	done;
 	@echo done with $(DIST)

@@ -11,7 +11,7 @@ I would've put it in GLApp, but then projects that use GL but not GLApp would st
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/glext.h>
 
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 
 #elif PLATFORM_linux
 

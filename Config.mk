@@ -1,14 +1,14 @@
-#PLATFORM=osx
-PLATFORM=linux
+PLATFORM=osx
+#PLATFORM=linux
 #PLATFORM=msvc
 #PLATFORM=mingw
 
-#CC=clang++
-CC=g++
+CC=clang++
+#CC=g++
 #CC=cl.exe
 
-#LD=clang++
-LD=g++
+LD=clang++
+#LD=g++
 #LD=lib.exe
 
 #linux
