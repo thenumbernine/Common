@@ -1,2 +1,15 @@
 distName='Common'
 distType='lib'
+
+-- [=[ GLEW
+-- as long as Common holds gl.h, it will need this too
+-- however the glewInit isn't called until GLApp
+-- so that's where the lib dependency is inserted
+-- which makes this all a mess.
+if platform == 'msvc' then
+	-- set this global here.  GLApp will pick it up.
+	--GLEWDir = cwd..'../../other/glew-2.1.0-VC'
+	GLEWDir = [[C:\Users\moorece\Projects\other\glew-2.1.0-VC]]
+	include:insert(GLEWDir..'\\include')
+end
+--]=]
