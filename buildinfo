@@ -9,7 +9,7 @@ distType='lib'
 if platform == 'msvc' then
 	-- set this global here.  GLApp will pick it up.
 	--GLEWDir = cwd..'../../other/glew-2.1.0-VC'
-	GLEWDir = [[C:\Users\moorece\Projects\other\glew-2.1.0-VC]]
-	include:insert(GLEWDir..'\\include')
+	GLEWDir = [[C:\Users\moorece\include]]
+	include:insert(GLEWDir)
 end
 --]=]

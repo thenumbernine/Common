@@ -25,6 +25,6 @@ I would've put it in GLApp, but then projects that use GL but not GLApp would st
 #define GL_GLEXT_PROTOTYPES
 #include "GL/glew.h"
 #include <GL/gl.h>
-//#include "glext.h"	//stored in Common/include/glext.h
+//#include "GL/glext.h"
 
 #endif
