@@ -9,8 +9,7 @@ cppver = 'c++14'
 -- which makes this all a mess.
 if platform == 'msvc' then
 	-- set this global here.  GLApp will pick it up.
-	--GLEWDir = cwd..'../../other/glew-2.1.0-VC'
-	GLEWDir = [[C:\Users\moorece\include]]
+	GLEWDir = os.getenv'USERPROFILE'..'\\include'
 	include:insert(GLEWDir)
 end
 --]=]
