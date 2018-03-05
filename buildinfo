@@ -7,7 +7,9 @@ cppver = 'c++14'
 -- however the glewInit isn't called until GLApp
 -- so that's where the lib dependency is inserted
 -- which makes this all a mess.
-if platform == 'msvc' then
+if platform == 'msvc' 
+or platform == 'clang_win'
+then
 	-- set this global here.  GLApp will pick it up.
 	GLEWDir = os.getenv'USERPROFILE'..'\\include'
 	include:insert(GLEWDir)

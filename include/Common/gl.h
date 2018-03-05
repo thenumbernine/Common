@@ -5,7 +5,7 @@ I would've put it in GLApp, but then projects that use GL but not GLApp would st
 */
 #pragma once
 
-#ifdef PLATFORM_osx
+#if defined(PLATFORM_osx)
 
 //for GLhandleARB, etc
 #include <OpenGL/OpenGL.h>
@@ -13,13 +13,13 @@ I would've put it in GLApp, but then projects that use GL but not GLApp would st
 
 #include <OpenGL/gl.h>
 
-#elif PLATFORM_linux
+#elif defined(PLATFORM_linux)
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-#elif PLATFORM_msvc
+#elif defined(PLATFORM_msvc) || defined(PLATFORM_clang_win)
 
 #include <windows.h>
 #define GL_GLEXT_PROTOTYPES
