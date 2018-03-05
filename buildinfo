@@ -1,5 +1,6 @@
 distName='Common'
 distType='lib'
+cppver = 'c++14'
 
 -- [=[ GLEW
 -- as long as Common holds gl.h, it will need this too
