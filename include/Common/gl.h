@@ -19,7 +19,7 @@ I would've put it in GLApp, but then projects that use GL but not GLApp would st
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-#elif defined(PLATFORM_msvc) || defined(PLATFORM_clang_win)
+#elif defined(PLATFORM_msvc) || defined(PLATFORM_mingw) || defined(PLATFORM_clang_win)
 
 #include <windows.h>
 #define GL_GLEXT_PROTOTYPES

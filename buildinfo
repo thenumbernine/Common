@@ -1,17 +1,13 @@
 distName='Common'
 distType='lib'
-cppver = 'c++14'
+cppver='c++14'
 
--- [=[ GLEW
--- as long as Common holds gl.h, it will need this too
--- however the glewInit isn't called until GLApp
--- so that's where the lib dependency is inserted
--- which makes this all a mess.
-if platform == 'msvc' 
-or platform == 'clang_win'
-then
-	-- set this global here.  GLApp will pick it up.
-	GLEWDir = os.getenv'USERPROFILE'..'\\include'
-	include:insert(GLEWDir)
+-- clang needs to know where msvc keeps its stuff ...
+if platform == 'clang_win' then
+	local libs = os.getenv'LIB'
+		:split';'
+		:filter(function(l) return #l > 0 end)
+		:map(function(l) return ('%q'):format(l) end)
+	libpaths:insert(libs[#libs])
+	--libpaths:append(libs)
 end
---]=]
