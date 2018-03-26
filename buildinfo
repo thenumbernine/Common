@@ -1,13 +1,3 @@
 distName='Common'
 distType='lib'
 cppver='c++14'
-
--- clang needs to know where msvc keeps its stuff ...
-if platform == 'clang_win' then
-	local libs = os.getenv'LIB'
-		:split';'
-		:filter(function(l) return #l > 0 end)
-		:map(function(l) return ('%q'):format(l) end)
-	libpaths:insert(libs[#libs])
-	--libpaths:append(libs)
-end
