@@ -1,10 +1,12 @@
 #include "Common/File.h"
+#include "Common/Exception.h"
 #include <fstream>
 
 namespace Common {
 
 std::string File::read(const std::string& filename) {
 	std::ifstream f(filename);
+	if (!f.good()) throw Common::Exception() << "failed to open file " << filename;
 	f.seekg(0, f.end);
 	size_t len = f.tellg();
 	f.seekg(0, f.beg);
