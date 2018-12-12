@@ -3,6 +3,7 @@
 //from https://stackoverflow.com/questions/4792449/c0x-has-no-semaphores-how-to-synchronize-threads
 
 #include <mutex>
+#include <thread>
 #include <condition_variable>
 
 namespace Common {

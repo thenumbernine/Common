@@ -1,3 +1,2 @@
 distName='Common'
 distType='lib'
-cppver='c++14'

@@ -23,7 +23,7 @@ I would've put it in GLApp, but then projects that use GL but not GLApp would st
 
 #include <windows.h>
 #define GL_GLEXT_PROTOTYPES
-#include "GL/glew.h"
+//#include "GL/glew.h"
 #include <GL/gl.h>
 //#include "GL/glext.h"
 
