@@ -32,5 +32,4 @@ inline std::ostream &operator<<(std::ostream &s, const Exception &t) {
 	return s << t.what();
 }
 
-};
-
+}

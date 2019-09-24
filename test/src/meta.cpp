@@ -3,62 +3,50 @@
 #include <iostream>
 #include <type_traits>
 
-using namespace std;
-
 //for-loop
 
 template<int index>
 struct TestEq {
 	static bool exec(int i) { 
-		typedef Function<void(int, char)>::Type A;
-		typedef TypeVector<int, char> B;
-		TEST_EQ(std::is_same<Function<A>::Arg<index> COMMA B::Get<index>>::value, 1);
+		using A = Common::Function<void(int, char)>::Type;
+		using B = std::tuple<int, char>;
+		TEST_EQ((std::is_same_v<Common::Function<A>::Arg<index>, std::tuple_element_t<index, B>>), 1);
 		return false;
 	}
 };
 
 void testForLoop() {
-	ForLoop<0, 2, TestEq>::exec(1);
-	TEST_EQ(std::is_same<Function<decltype(TestEq<0>::exec)>::Arg<0> COMMA int>::value, 1);
+	Common::ForLoop<0, 2, TestEq>::exec(1);
+	TEST_EQ((std::is_same_v<Common::Function<decltype(TestEq<0>::exec)>::Arg<0>, int>), 1);
 }
 
 int test(double, char) { return 0; }
 
 int main() {
-	//testing Function ::numArgs and ::Arg<n>
+	//testing Common::Function ::numArgs and ::Arg<n>
 	{	
-		typedef Function<void()> A;
+		using A = Common::Function<void()>;
 		TEST_EQ(A::numArgs, 0);
-		TEST_EQ(std::is_same<A::Return COMMA void>::value, true);
+		TEST_EQ((std::is_same_v<A::Return, void>), true);
 
-		typedef Function<void(int)> B;
+		using B = Common::Function<void(int)>;
 		TEST_EQ(B::numArgs, 1);
-		TEST_EQ(std::is_same<B::Return COMMA void>::value, 1);
-		TEST_EQ(std::is_same<B::Arg<0> COMMA int>::value, 1);
+		TEST_EQ((std::is_same_v<B::Return, void>), 1);
+		TEST_EQ((std::is_same_v<B::Arg<0>, int>), 1);
 		
-		typedef Function<char(int, double)> C;
+		using C = Common::Function<char(int, double)>;
 		TEST_EQ(C::numArgs, 2);
-		TEST_EQ(std::is_same<C::Return COMMA char>::value, 1);
-		TEST_EQ(std::is_same<C::Arg<0> COMMA int>::value, 1);
-		TEST_EQ(std::is_same<C::Arg<1> COMMA double>::value, 1);
+		TEST_EQ((std::is_same_v<C::Return, char>), 1);
+		TEST_EQ((std::is_same_v<C::Arg<0>, int>), 1);
+		TEST_EQ((std::is_same_v<C::Arg<1>, double>), 1);
 	}
 
-	//testing TypeVector ::size and ::Get<n>
+	//testing Common::Function from inferred functions
 	{
-		TEST_EQ(TypeVector<>::size, 0);
-		TEST_EQ(TypeVector<int>::size, 1);
-		TEST_EQ(TypeVector<int COMMA char>::size, 2);
-		TEST_EQ(std::is_same<TypeVector<int COMMA char>::Get<1> COMMA char>::value, 1);
-		TEST_EQ(std::is_same<TypeVector<int COMMA int>::Get<0> COMMA int>::value, 1);
-		TEST_EQ(std::is_same<TypeVector<int>::Get<0> COMMA int>::value, 1);
-	}
-
-	//testing Function from inferred functions
-	{
-		TEST_EQ(Function<decltype(test)>::numArgs, 2);
-		TEST_EQ(std::is_same<Function<decltype(test)>::Return COMMA int>::value, 1);
-		TEST_EQ(std::is_same<Function<decltype(test)>::Arg<0> COMMA double>::value, 1);
-		TEST_EQ(std::is_same<Function<decltype(test)>::Arg<1> COMMA char>::value, 1);
+		TEST_EQ(Common::Function<decltype(test)>::numArgs, 2);
+		TEST_EQ((std::is_same_v<Common::Function<decltype(test)>::Return, int>), 1);
+		TEST_EQ((std::is_same_v<Common::Function<decltype(test)>::Arg<0>, double>), 1);
+		TEST_EQ((std::is_same_v<Common::Function<decltype(test)>::Arg<1>, char>), 1);
 	}
 
 	testForLoop();

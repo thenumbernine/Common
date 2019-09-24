@@ -1,65 +1,12 @@
 #pragma once
 
 #include <functional>
+#include <tuple>
+
+namespace Common {
 
 //common metaprograms
 
-/*
-vector of types 
-TypeVector<int, char, ...>::Get<1> is type char
-TypeVector<int, char, double>::size == 3
-*/
-
-template<int index, typename... Args>
-struct GetTypeVector;
-
-template<int index, typename Arg, typename... Args> 
-struct GetTypeVector<index, Arg, Args...> {
-	typedef typename std::conditional<
-		index == 0,
-		Arg,
-		typename GetTypeVector<index-1, Args...>::Type
-	>::type Type;
-};
-
-template<typename Arg, typename... Args>
-struct GetTypeVector<0, Arg, Args...> {
-	typedef Arg Type;
-};
-
-template<typename Arg>
-struct GetTypeVector<0, Arg> {
-	typedef Arg Type;
-};
-
-template<typename... Args>
-struct TypeVector;
-
-template<>
-struct TypeVector<> {
-	enum { size = 0 };
-	template<int index>
-	using Get = void;
-};
-
-template<typename Arg, typename... Args>
-struct TypeVector<Arg, Args...> {
-	typedef TypeVector<Args...> Next;
-	enum { size = Next::size + 1 };
-
-	template<int index>
-	using Get = typename GetTypeVector<index, Arg, Args...>::Type;
-};
-
-//type concat
-
-template<typename Arg1, typename Arg2>
-struct ConcatTypeVector;
-
-template<typename... Arg1, typename... Arg2>
-struct ConcatTypeVector<TypeVector<Arg1...>, TypeVector<Arg2...>> {
-	typedef TypeVector<Arg1..., Arg2...> Type;
-};
 
 //function parameters
 
@@ -68,13 +15,13 @@ struct Function;
 
 template<typename Return_, typename... ArgList>
 struct Function<Return_(ArgList...)> {
-	typedef Return_ Type(ArgList...);
-	typedef Return_ Return;
-	typedef TypeVector<ArgList...> Args;
-	enum { numArgs = Args::size };
+	using Type = Return_(ArgList...);
+	using Return = Return_;
+	using Args = std::tuple<ArgList...>;
+	static constexpr auto numArgs = std::tuple_size_v<Args>;
 	
 	template<int index>
-	using Arg = typename Args::template Get<index>;
+	using Arg = std::tuple_element_t<index, Args>;
 };
 
 //for loop - compile-time indexes and execution of runtime code
@@ -96,3 +43,4 @@ struct ForLoop<end, end, Exec> {
 	}
 };
 
+}

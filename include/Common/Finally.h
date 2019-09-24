@@ -6,14 +6,12 @@ namespace Common {
 
 class Finally {
 public:
-	typedef std::function<void()> Callback;
+	using Callback = std::function<void()>;
 private:
 	Callback f;
 public:
 	Finally(Callback f_) : f(f_) {}
-	~Finally() {
-		f();
-	}
+	~Finally() noexcept(false) { f(); }
 };
 
-};
+}

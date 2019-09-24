@@ -33,4 +33,4 @@ void File::remove(const std::string& filename) {
 	std::remove(filename.c_str());
 }
 
-};
+}

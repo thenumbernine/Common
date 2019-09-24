@@ -21,4 +21,3 @@ template<class D, class B>
 D const volatile& crtp_cast(B const volatile& p) {
 	return static_cast<D const volatile&>(p);
 }
-
