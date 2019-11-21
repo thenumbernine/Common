@@ -2,6 +2,10 @@
 
 COMMON_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
 
+#https://stackoverflow.com/questions/664601/in-gnu-make-how-do-i-convert-a-variable-to-lower-case
+lowercase = $(shell echo $(1) | tr A-Z a-z)
+uppercase = $(shell echo $(1) | tr a-z A-Z)
+
 include $(COMMON_PATH)Config.mk
 
 buildVar = \
@@ -31,11 +35,11 @@ OBJPATHS=$(addprefix $(OBJDIR)/, $(OBJECTS))
 INCLUDE=include
 INCLUDE+=$(COMMON_PATH)include
 
-MACROS=PLATFORM_$(PLATFORM) BUILD_$(BUILD)
+MACROS=PLATFORM_$(call uppercase,$(PLATFORM)) BUILD_$(call uppercase,$(BUILD))
 MACROS_debug=DEBUG
 MACROS_release=NDEBUG
 
-CPPVER=c++11
+CPPVER=c++17
 
 CFLAGS_osx=-c -Wall -std=$(CPPVER)
 CFLAGS_osx_debug=-O0 -gdwarf-2 -mfix-and-continue
