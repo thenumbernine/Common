@@ -43,4 +43,25 @@ struct ForLoop<end, end, Exec> {
 	}
 };
 
+//https://stackoverflow.com/a/43211852
+template<typename T> struct MemberPointer {};
+template<typename ClassType_, typename FieldType_>
+struct MemberPointer<FieldType_ ClassType_::*> {
+	using ClassType = ClassType_;
+	using FieldType = FieldType_;
+};
+
+// https://stackoverflow.com/a/6894436
+template<std::size_t I = 0, typename FuncT, typename... Tp>
+inline typename std::enable_if_t<I == sizeof...(Tp), void>
+TupleForEach(const std::tuple<Tp...> &, FuncT) {}
+
+template<std::size_t I = 0, typename FuncT, typename... Tp>
+inline typename std::enable_if_t<I < sizeof...(Tp), void>
+TupleForEach(const std::tuple<Tp...>& t, FuncT f)
+{
+	f(std::get<I>(t), I);
+	TupleForEach<I + 1, FuncT, Tp...>(t, f);
+}
+
 }
