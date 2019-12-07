@@ -22,7 +22,9 @@ public:
 		return msg.c_str();
 	}
 
-	template<typename T> inline Exception &operator<<(const T &stuff) {
+	template<typename T>
+	Exception &operator<<(const T &stuff) {
+		using ::operator<<;
 		s << stuff;
 		return *this;
 	}
