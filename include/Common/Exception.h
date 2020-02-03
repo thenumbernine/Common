@@ -24,7 +24,8 @@ public:
 
 	template<typename T>
 	Exception &operator<<(const T &stuff) {
-		using ::operator<<;
+		//hmm... can't specify to use global operator<< unless it is already defined...
+		//using ::operator<<;
 		s << stuff;
 		return *this;
 	}
