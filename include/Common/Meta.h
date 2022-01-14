@@ -52,16 +52,17 @@ struct MemberPointer<FieldType_ ClassType_::*> {
 };
 
 // https://stackoverflow.com/a/6894436/2714073
+// return 'true' to stop early
 template<std::size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if_t<I == sizeof...(Tp), void>
+inline typename std::enable_if_t<I == sizeof...(Tp), bool>
 TupleForEach(const std::tuple<Tp...> &, FuncT) {}
 
 template<std::size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if_t<I < sizeof...(Tp), void>
+inline typename std::enable_if_t<I < sizeof...(Tp), bool>
 TupleForEach(const std::tuple<Tp...>& t, FuncT f)
 {
-	f(std::get<I>(t), I);
-	TupleForEach<I + 1, FuncT, Tp...>(t, f);
+	if (f(std::get<I>(t), I)) return true;
+	return TupleForEach<I + 1, FuncT, Tp...>(t, f);
 }
 
 }
