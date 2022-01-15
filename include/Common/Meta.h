@@ -191,8 +191,8 @@ template<
 >
 Container<
 	//ToElem
-	decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
-	//typename MemberPointer<MemberFieldType>::FieldType
+	//decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
+	typename MemberPointer<MemberFieldType>::FieldType
 > mapValuesToMemberField(
 	Container<FromElem> const & from,
 	MemberFieldType fromElemField
@@ -200,8 +200,8 @@ Container<
 ) {
 	Container<
 		//ToElem
-		decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
-		//typename MemberPointer<MemberFieldType>::FieldType
+		//decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
+		typename MemberPointer<MemberFieldType>::FieldType
 	> to;
 	for (FromElem const & fromElem : from) {
 		to.insert(to.end(), fromElem.*fromElemField);
