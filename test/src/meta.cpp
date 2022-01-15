@@ -2,6 +2,8 @@
 #include "Common/Meta.h"
 #include <iostream>
 #include <type_traits>
+#include <map>
+#include <vector>
 
 //for-loop
 
@@ -50,4 +52,37 @@ int main() {
 	}
 
 	testForLoop();
+
+	//testing mapElem
+	{
+		auto v = std::vector<std::string>{ "a", "be", "see" };
+
+		//doesn't know return container template, so can't auto-deduce
+		auto x = Common::mapElems<
+			std::vector<std::string>,
+			std::vector<size_t>
+		>(v, [](std::string const & s) -> size_t { return s.size(); });
+
+		auto w = Common::mapElemsToMemberMethod<
+			std::vector<std::string>,
+			std::vector<size_t>
+		>(v, &std::string::size);
+
+		// but on the plus side, you can map to new containers
+		auto m = Common::mapElems<
+			std::vector<std::string>,
+			std::map<std::string, size_t>
+		>(
+			v,
+			[](std::string const & s) -> std::map<std::string, size_t>::value_type {
+				return std::pair<std::string, size_t>(s, s.size());
+			}
+		);
+		
+		//does know return container template, so can auto-deduce
+		//however (for now) container must be single-template-param
+		auto y = Common::mapValues(v, [](std::string const & s) -> size_t { return s.size(); });
+		
+		auto z = Common::mapValuesToMemberMethod(v, &std::string::size);
+	}
 }
