@@ -191,7 +191,7 @@ template<
 >
 Container<
 	//ToElem
-	decltype(std::declval<FromElem>().*(MemberFieldType()))
+	decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
 	//typename MemberPointer<MemberFieldType>::FieldType
 > mapValuesToMemberField(
 	Container<FromElem> const & from,
@@ -200,7 +200,7 @@ Container<
 ) {
 	Container<
 		//ToElem
-		decltype(std::declval<FromElem>().*(MemberFieldType()))
+		decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
 		//typename MemberPointer<MemberFieldType>::FieldType
 	> to;
 	for (FromElem const & fromElem : from) {
@@ -217,7 +217,7 @@ template<
 >
 Container<
 	//ToElem
-	decltype((std::declval<FromElem>().*(MemberMethodType()))())
+	decltype((std::declval<FromElem>().*(std::declval<MemberMethodType>()))())
 	//typename MemberMethodPointer<MemberMethodType>::ReturnType
 > mapValuesToMemberMethod(
 	Container<FromElem> const & from,
@@ -226,7 +226,7 @@ Container<
 ) {
 	Container<
 		//ToElem
-		decltype((std::declval<FromElem>().*(MemberMethodType()))())
+		decltype((std::declval<FromElem>().*(std::declval<MemberMethodType>()))())
 		//typename MemberMethodPointer<MemberMethodType>::ReturnType
 	> to;
 	for (FromElem const & fromElem : from) {
