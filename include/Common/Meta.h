@@ -62,7 +62,7 @@ struct MemberMethodPointer<ReturnType_ ClassType_::*()> {
 // return 'true' to stop early
 template<std::size_t I = 0, typename FuncT, typename... Tp>
 inline typename std::enable_if_t<I == sizeof...(Tp), bool>
-TupleForEach(std::tuple<Tp...> const &, FuncT) {}
+TupleForEach(std::tuple<Tp...> const &, FuncT) { return {}; }
 
 template<std::size_t I = 0, typename FuncT, typename... Tp>
 inline typename std::enable_if_t<I < sizeof...(Tp), bool>
