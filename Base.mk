@@ -17,15 +17,16 @@ buildVar = \
 	$($(1)_$(PLATFORM)_$(BUILD))\
 	$($(1)_$(PLATFORM)_$(DIST_TYPE)_$(BUILD))
 
-space :=
-space +=
-concat = $(subst $(space),,$(strip $1))
+#I forget where I got the previous concat-without-spaces that seems to have broken compatability over the  years
+# but the new one that fixes gnu make's broken concat compatability is here: https://stackoverflow.com/a/53124524
+empty:=
+space:=$(empty) $(empty)
+concat = $(subst ${space},,$(strip $1))
 escapechar :=\ 
 escapechar :=$(subst $(space),,$(escapechar))
 
 SRCDIR_BASE=src
 SOURCES=$(shell $(FIND) $(SRCDIR_BASE) -type f -name *.cpp)
-HEADERS=$(shell $(FIND) include -type f)
 OBJECTS=$(patsubst $(SRCDIR_BASE)/%.cpp, %.o, $(SOURCES))
 
 OBJDIR_BASE=obj
@@ -34,6 +35,7 @@ OBJPATHS=$(addprefix $(OBJDIR)/, $(OBJECTS))
 
 INCLUDE=include
 INCLUDE+=$(COMMON_PATH)include
+#HEADERS=$(shell $(FIND) $(INCLUDE) -type f)
 
 MACROS=PLATFORM_$(call uppercase,$(PLATFORM)) BUILD_$(call uppercase,$(BUILD))
 MACROS_debug=DEBUG
