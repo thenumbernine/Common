@@ -25,6 +25,9 @@ concat = $(subst ${space},,$(strip $1))
 escapechar :=\ 
 escapechar :=$(subst $(space),,$(escapechar))
 
+# $(call copyTreeOfType, pattern, path from, path to)
+copyTreeOfType = rsync -avm --include='$1' -f 'hide,! */' $2 $3
+
 SRCDIR_BASE=src
 SOURCES=$(shell $(FIND) $(SRCDIR_BASE) -type f -name *.cpp)
 OBJECTS=$(patsubst $(SRCDIR_BASE)/%.cpp, %.o, $(SOURCES))
