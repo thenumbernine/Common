@@ -43,27 +43,27 @@ MACROS_release=NDEBUG
 
 CPPVER=c++17
 
-CFLAGS_osx=-c -Wall -std=$(CPPVER)
-CFLAGS_osx_debug=-O0 -gdwarf-2 -mfix-and-continue
-CFLAGS_osx_release=-O3
-CFLAGS_lib_osx+=-fPIC
-CFLAG_OUTPUT_osx=-o
-CFLAG_INCLUDE_osx=-I
-CFLAG_MACRO_osx=-D
+CXXFLAGS_osx=-c -Wall -std=$(CPPVER)
+CXXFLAGS_osx_debug=-O0 -gdwarf-2 -mfix-and-continue
+CXXFLAGS_osx_release=-O3
+CXXFLAGS_lib_osx+=-fPIC
+CXXFLAG_OUTPUT_osx=-o
+CXXFLAG_INCLUDE_osx=-I
+CXXFLAG_MACRO_osx=-D
 LDFLAG_OUTPUT_osx=-o
 
-CFLAGS_linux=-c -Wall -std=$(CPPVER) -fPIC
-CFLAGS_linux_debug=-O0 -gdwarf-2
-CFLAGS_linux_release=-O3
-CFLAG_OUTPUT_linux=-o
-CFLAG_INCLUDE_linux=-I
-CFLAG_MACRO_linux=-D
+CXXFLAGS_linux=-c -Wall -std=$(CPPVER) -fPIC
+CXXFLAGS_linux_debug=-O0 -gdwarf-2
+CXXFLAGS_linux_release=-O3
+CXXFLAG_OUTPUT_linux=-o
+CXXFLAG_INCLUDE_linux=-I
+CXXFLAG_MACRO_linux=-D
 LDFLAG_OUTPUT_linux=-o
 
-CFLAGS_msvc=/c /EHsc
-CFLAG_OUTPUT_msvc=/Fo:
-CFLAG_INCLUDE_msvc=/I
-CFLAG_MACRO_msvc=/D
+CXXFLAGS_msvc=/c /EHsc
+CXXFLAG_OUTPUT_msvc=/Fo:
+CXXFLAG_INCLUDE_msvc=/I
+CXXFLAG_MACRO_msvc=/D
 LDFLAG_OUTPUT_msvc=/Fe:
 
 
@@ -217,9 +217,9 @@ post_builddist_osx_app::
 	@echo
 
 .PHONY: builddist
-builddist: CFLAGS+= $(call buildVar,CFLAGS)
-builddist: CFLAGS+= $(addprefix -I,$(INCLUDE) $(call buildVar,INCLUDE))
-builddist: CFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
+builddist: CXXFLAGS+= $(call buildVar,CXXFLAGS)
+builddist: CXXFLAGS+= $(addprefix -I,$(INCLUDE) $(call buildVar,INCLUDE))
+builddist: CXXFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
 builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
 builddist: DEPLIBS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
 builddist: DEPLIBS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
@@ -230,7 +230,7 @@ builddist: $(DIST)
 
 $(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell $(FIND) $(file) -type f))
 	-mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(call buildVar,CFLAG_OUTPUT) $@ $<
+	$(CC) $(CXXFLAGS) $(call buildVar,CXXFLAG_OUTPUT) $@ $<
 
 # .o files must go before their dependencies
 # but I'm adding those dependencies inside the LDFLAGS
