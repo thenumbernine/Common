@@ -35,7 +35,7 @@ OBJPATHS=$(addprefix $(OBJDIR)/, $(OBJECTS))
 
 INCLUDE=include
 INCLUDE+=$(COMMON_PATH)include
-#HEADERS=$(shell $(FIND) $(INCLUDE) -type f)
+#HEADERS=$(shell $(FIND) include -type f)
 
 MACROS=PLATFORM_$(call uppercase,$(PLATFORM)) BUILD_$(call uppercase,$(BUILD))
 MACROS_debug=DEBUG
@@ -236,9 +236,10 @@ $(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell $(FIND) 
 # but I'm adding those dependencies inside the LDFLAGS
 # so this means .o files will go before their flag definitions
 # (unless I separate the lib dependencies out of LDFLAGS ...)
+# so I should put LDFLAGS after $^
 $(DIST):: $(OBJPATHS)
 	-mkdir -p $(@D)
-	$(LD) $(LDFLAGS) $^ $(DEPLIBS) $(call buildVar,LDFLAG_OUTPUT) $@
+	$(LD) $^ $(LDFLAGS) $(DEPLIBS) $(call buildVar,LDFLAG_OUTPUT) $@
 
 .PHONY: clean
 clean:
