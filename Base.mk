@@ -41,7 +41,7 @@ MACROS=PLATFORM_$(call uppercase,$(PLATFORM)) BUILD_$(call uppercase,$(BUILD))
 MACROS_debug=DEBUG
 MACROS_release=NDEBUG
 
-CPPVER=c++17
+CPPVER=c++20
 
 CXXFLAGS_osx=-c -Wall -std=$(CPPVER)
 CXXFLAGS_osx_debug=-O0 -gdwarf-2 -mfix-and-continue
