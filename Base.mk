@@ -171,6 +171,13 @@ post_builddist_$(PLATFORM): post_builddist_$(PLATFORM)_$(DIST_TYPE)
 .PHONY: post_builddist_$(PLATFORM)_$(DIST_TYPE)
 post_builddist_$(PLATFORM)_$(DIST_TYPE):: builddist
 
+post_builddist_linux_app::
+	-cp -R res/* $(DISTDIR)/
+	@for file in $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS); \
+	do \
+		cp $$file $(DISTDIR); \
+	done;
+
 post_builddist_osx_app::
 	@printf APPLhect > $(dir $(DIST))../PkgInfo
 	@echo '<?xml version="1.0" encoding="UTF-8"?>' > $(dir $(DIST))../Info.plist
