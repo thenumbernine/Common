@@ -5,6 +5,15 @@
 #include <sstream>
 #include <vector>
 
+
+//not sure which of these I need
+#include <numeric>
+#include <map>
+#include <regex>
+#include <string>
+#include <sstream>
+
+
 //default ostream operator<< for objects that have the field 'fields'...
 template<typename T> requires Common::has_fields_v<T>
 inline std::ostream& operator<<(std::ostream& o, T const & b) {
