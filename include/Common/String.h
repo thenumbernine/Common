@@ -66,17 +66,6 @@ inline std::string const & to_string(std::string const & s) {
 	return s;
 }
 
-// TODO put this in Tensor/Vector.h
-template<typename T, int n>
-std::string to_string(Tensor::Vector<T, n> const & x) {
-	return Common::objectStringFromOStream(x);
-}
-
-template<typename T>
-std::string to_string(std::vector<T> const & x) {
-	return Common::objectStringFromOStream(x);
-}
-
 }
 
 namespace Common {
