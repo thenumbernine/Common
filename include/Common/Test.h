@@ -5,7 +5,9 @@
 #include "Common/Exception.h"
 
 #define ECHO(x)\
-	std::cout << #x << "\t" << (x) << std::endl;
+	std::cout\
+		<< __FILE__ << ":" << __LINE__ << ": "\
+		<< #x << " :: " << (x) << std::endl;
 
 #define TEST_OP(a,b,op)\
 	{\
