@@ -11,12 +11,11 @@
 #include <map>
 #include <regex>
 #include <string>
-#include <sstream>
 
 
 //default ostream operator<< for objects that have the field 'fields'...
 template<typename T> requires Common::has_fields_v<T>
-inline std::ostream& operator<<(std::ostream& o, T const & b) {
+std::ostream& operator<<(std::ostream& o, T const & b) {
 	o << "[";
 	Common::TupleForEach(T::fields, [&o, &b](auto const & x, size_t i) constexpr -> bool {
 		auto const & name = std::get<0>(x);
@@ -55,9 +54,14 @@ std::ostream& operator<<(std::ostream& o, std::vector<T> const & v) {
 
 namespace std {
 
+template<typename T>
+std::string to_string(std::vector<T> const & x) {
+	return Common::objectStringFromOStream(x);
+}
+
 //if a typename has 'fields' then std::to_string will use objectStringFromOStream
 template<typename T> requires Common::has_fields_v<T>
-inline std::string to_string(T const & x) {
+std::string to_string(T const & x) {
 	return Common::objectStringFromOStream(x);
 }
 
