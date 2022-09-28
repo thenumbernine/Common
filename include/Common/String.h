@@ -12,6 +12,17 @@
 #include <regex>
 #include <string>
 
+
+// should all std::to_string's come first?
+
+namespace std {
+//for template argument sake this should have always been defined
+inline std::string const & to_string(std::string const & s) {
+	return s;
+}
+
+}
+
 namespace Common {
 
 template<typename T>
@@ -128,11 +139,4 @@ std::string to_string(T const & x) {
 	return Common::objectStringFromOStream(x);
 }
 
-//for template argument sake this should have always been defined
-inline std::string const & to_string(std::string const & s) {
-	return s;
 }
-
-}
-
-
