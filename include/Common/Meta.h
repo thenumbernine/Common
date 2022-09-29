@@ -22,6 +22,9 @@ struct Function<Return_(ArgList...)> {
 	
 	template<int index>
 	using Arg = std::tuple_element_t<index, Args>;
+
+	// running out of naming conventions to use ... Common::Function is my wrapper ... Type is for the C-function-type ... FuncType is for the C++ function<> type ...
+	using FuncType = std::function<Type>;
 };
 
 //building a Function from a return type and tuple type to represent its arg type list 
