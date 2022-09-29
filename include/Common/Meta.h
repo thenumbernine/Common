@@ -24,6 +24,27 @@ struct Function<Return_(ArgList...)> {
 	using Arg = std::tuple_element_t<index, Args>;
 };
 
+//building a Function from a return type and tuple type to represent its arg type list 
+
+template<typename Return, typename TupleArgList>
+struct FunctionWithTupleArgs {
+};
+
+template<typename Return_, typename... ArgList>
+struct FunctionWithTupleArgs<Return_, std::tuple<ArgList...>> {
+	using type = Function<Return_(ArgList...)>;
+};
+
+template<typename Return, typename TupleArgList>
+using FunctionWithTupleArgs_t = typename FunctionWithTupleArgs<Return, TupleArgList>::type;
+
+//building a Function from a Lambda
+
+template<typename Lambda>
+using FunctionFromLambda = Common::Function<
+	typename std::remove_pointer<decltype(+Lambda())>::type
+>;
+
 //for loop - compile-time indexes and execution of runtime code
 
 template<int index, int end, template<int> class Exec>
