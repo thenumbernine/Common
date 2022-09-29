@@ -30,8 +30,16 @@ constexpr bool has_to_ostream_v = requires(T const & t) { &T::to_ostream; };
 
 }
 
-//default ostream operator<< for objects that have the member function 'to_ostream(ostream& o) const'
-// TODO hmm why isn't it working? failing for Tensor::_vec::iterator
+/*
+Allow a default ostream operator<< for objects that have the member function 'to_ostream(ostream& o) const'
+TODO hmm why isn't it working? failing for Tensor::_vec::iterator
+
+Wait isn't namespace operator resolve need this to be defined in the same namespace as whatever is using it?
+and if that's true, then making a templated version of this function seems kinda pointless / counter-productive.
+
+Ok now I'm asking why do this, because providing a member to_ostream is probably more rigid than just providing an overload of operator<<(ostream)
+and the reason I can think of is what about templated nested classes and code organization, putting the templated nested class ostream method inside/next to the class rather than half way down the file (_vec::ReadIterator)
+*/
 template<typename T>
 requires Common::has_to_ostream_v<T>
 std::ostream & operator<<(std::ostream & o, T const & t) {
@@ -39,8 +47,9 @@ std::ostream & operator<<(std::ostream & o, T const & t) {
 }
 
 //default ostream operator<< for objects that have the field 'fields'...
+// if we don't have a 'to_ostream' but we do have 'fields' then use that
 template<typename T>
-requires Common::has_fields_v<T>
+requires (!Common::has_to_ostream_v<T> && Common::has_fields_v<T>)
 std::ostream& operator<<(std::ostream& o, T const & b) {
 	o << "{";
 	Common::TupleForEach(T::fields, [&o, &b](auto const & x, size_t i) constexpr -> bool {
@@ -95,7 +104,7 @@ typename T::value_type sum(T const & t) {
 //produce a string based on an object's ostream operator<<
 template<typename T>
 std::string objectStringFromOStream(T const & x) {
-	using ::operator<<; // seeing this always seems like a bad sign
+	//using ::operator<<; // seeing this always seems like a bad sign
 	std::ostringstream ss;
 	ss << x;
 	return ss.str();
@@ -112,7 +121,9 @@ std::ostream & iteratorToOStream(std::ostream & o, T const & v) {
 	return o << "}";
 }
 
-}
+} // namespace Common
+
+namespace std {
 
 //default vector ostream operator<<
 template<typename T>
@@ -126,8 +137,6 @@ std::ostream & operator<<(std::ostream& o, std::array<T,N> const & v) {
 	return Common::iteratorToOStream<decltype(v)>(o, v);
 }
 
-namespace std {
-
 template<typename T>
 std::string to_string(std::vector<T> const & x) {
 	return Common::objectStringFromOStream(x);
@@ -139,4 +148,4 @@ std::string to_string(T const & x) {
 	return Common::objectStringFromOStream(x);
 }
 
-}
+} // namespace std
