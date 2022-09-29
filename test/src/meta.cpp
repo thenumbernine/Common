@@ -9,7 +9,9 @@
 
 template<int index>
 struct TestEq {
-	static bool exec(int i) { 
+	// arg here just here to prove you can pass stuff into this function
+	static bool exec(std::string const & randomarg) { 
+		TEST_EQ(randomarg, std::string("hello"));
 		using A = Common::Function<void(int, char)>::Type;
 		using B = std::tuple<int, char>;
 		TEST_EQ((std::is_same_v<Common::Function<A>::Arg<index>, std::tuple_element_t<index, B>>), 1);
@@ -18,8 +20,18 @@ struct TestEq {
 };
 
 void testForLoop() {
-	Common::ForLoop<0, 2, TestEq>::exec(1);
-	TEST_EQ((std::is_same_v<Common::Function<decltype(TestEq<0>::exec)>::Arg<0>, int>), 1);
+	Common::ForLoop<0, 2, TestEq>::exec("hello");
+	
+	//test Common::Function too , make sure it deduces the 'bool(string)' signature
+	static_assert((std::is_same_v<
+		Common::Function<decltype(TestEq<0>::exec)>,
+		Common::FunctionFromTupleArgs<bool, Common::tuple_of_same_type<std::string const &, 1>>
+	>));
+	
+	Common::ForLoop<0, 1, TestEq>::exec("hello");
+	
+	Common::ForLoop<0, 0, TestEq>::exec("hello");
+	
 }
 
 int test(double, char) { return 0; }
