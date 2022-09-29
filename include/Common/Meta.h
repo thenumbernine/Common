@@ -30,16 +30,16 @@ struct Function<Return_(ArgList...)> {
 //building a Function from a return type and tuple type to represent its arg type list 
 
 template<typename Return, typename TupleArgList>
-struct FunctionWithTupleArgs {
+struct FunctionFromTupleArgsImpl {
 };
 
 template<typename Return_, typename... ArgList>
-struct FunctionWithTupleArgs<Return_, std::tuple<ArgList...>> {
+struct FunctionFromTupleArgsImpl<Return_, std::tuple<ArgList...>> {
 	using type = Function<Return_(ArgList...)>;
 };
 
 template<typename Return, typename TupleArgList>
-using FunctionWithTupleArgs_t = typename FunctionWithTupleArgs<Return, TupleArgList>::type;
+using FunctionFromTupleArgs = typename FunctionFromTupleArgsImpl<Return, TupleArgList>::type;
 
 //building a Function from a Lambda
 
@@ -75,9 +75,36 @@ struct MemberPointer<FieldType_ ClassType_::*> {
 	using FieldType = FieldType_;
 };
 
+// member method pointer, but only for templated return and void() args
+// TODO vararg handle all args
+
 template<typename T> struct MemberMethodPointer {};
+
 template<typename ClassType_, typename ReturnType_>
-struct MemberMethodPointer<ReturnType_ ClassType_::*()> {
+struct MemberMethodPointer<ReturnType_ (ClassType_::*)()> {
+	static constexpr bool is_const = false;
+	static constexpr bool is_noexcept = false;
+	using ClassType = ClassType_;
+	using ReturnType = ReturnType_;
+};
+template<typename ClassType_, typename ReturnType_>
+struct MemberMethodPointer<ReturnType_ (ClassType_::*)() noexcept> {
+	static constexpr bool is_const = false;
+	static constexpr bool is_noexcept = true;
+	using ClassType = ClassType_;
+	using ReturnType = ReturnType_;
+};
+template<typename ClassType_, typename ReturnType_>
+struct MemberMethodPointer<ReturnType_ (ClassType_::*)() const> {
+	static constexpr bool is_const = true;
+	static constexpr bool is_noexcept = false;
+	using ClassType = ClassType_;
+	using ReturnType = ReturnType_;
+};
+template<typename ClassType_, typename ReturnType_>
+struct MemberMethodPointer<ReturnType_ (ClassType_::*)() const noexcept> {
+	static constexpr bool is_const = true;
+	static constexpr bool is_noexcept = true;
 	using ClassType = ClassType_;
 	using ReturnType = ReturnType_;
 };
@@ -181,82 +208,62 @@ To mapElemsToMemberMethod(
 }
 
 
-//ok me trying to get templates to auto-deduce
-// seems like it doesn't want to deduce based on return type / assignment, 
-//  so instead how about a function for when the templated class doesn't change, but the parameter does
-template<
-	template<typename Value> typename Container,
-	typename FromElem,
-	//I could have template ToElem, then replace "FunctionType f" with "std::function<ToType(FromType)> f", but I'm getting template type substitution failures with this.
-	//typename ToElem
-	//Wo instead, I'll match the arg and deduce the result type for the container.
-	typename FunctionType	
+// map function in C++
+// https://stackoverflow.com/a/30534744
+
+template <
+	template <class...> class Container,
+	class Transform,
+	class ContainerT
+	/*, class... ContainerParams // breaks in g++ < 12.1.0 */
 >
-Container<
-	decltype(std::declval<FunctionType>()(FromElem()))//ToElem
-> mapValues(
-	Container<FromElem> const & from,
-	FunctionType f
+auto mapValues(
+	Container<ContainerT/*, ContainerParams...*/> const & container,
+	Transform && transform
 ) {
-	Container<
-		decltype(std::declval<FunctionType>()(FromElem()))//ToElem
-	> to;
-	for (FromElem const & fromElem : from) {
-		to.insert(to.end(), f(fromElem));
-	}
-	return to;
+	using DestT = std::result_of_t<Transform(ContainerT const&)>;
+	Container<DestT/*, ContainerParams...*/> res;
+	std::transform(
+		std::begin(container),
+		std::end(container),
+		std::inserter(res, std::end(res)),
+		std::forward<Transform>(transform)
+	);
+	return res;
+}
+
+// TODO I could use MemberPointer like I'm doing in 'mapValuesToMemberMethod' but meh
+template<
+	template <typename...> typename Container,
+	typename FromElem,
+	typename ToElem
+>
+Container<ToElem> mapValuesToMemberField(
+	Container<FromElem> const & from,
+	ToElem FromElem::*fromElemField
+) {
+	return mapValues(from, [fromElemField](
+		FromElem const & fromElem
+	) -> ToElem {
+		return fromElem.*fromElemField;
+	});
 }
 
 template<
-	template<typename Value> typename Container,
-	typename FromElem,
-	//typename ToElem
-	typename MemberFieldType
->
-Container<
-	//ToElem
-	//decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
-	typename MemberPointer<MemberFieldType>::FieldType
-> mapValuesToMemberField(
-	Container<FromElem> const & from,
-	MemberFieldType fromElemField
-	//ToElem FromElem::*fromElemField
-) {
-	Container<
-		//ToElem
-		//decltype(std::declval<FromElem>().*(std::declval<MemberFieldType>()))
-		typename MemberPointer<MemberFieldType>::FieldType
-	> to;
-	for (FromElem const & fromElem : from) {
-		to.insert(to.end(), fromElem.*fromElemField);
-	}
-	return to;
-}
-
-template<
-	template<typename Value> typename Container,
-	typename FromElem,
-	//typename ToElem
+	template<typename...> typename Container,
 	typename MemberMethodType
 >
-Container<
-	//ToElem
-	decltype((std::declval<FromElem>().*(std::declval<MemberMethodType>()))())
-	//typename MemberMethodPointer<MemberMethodType>::ReturnType
-> mapValuesToMemberMethod(
-	Container<FromElem> const & from,
-	MemberMethodType fromElemMethod
-	//ToElem (FromElem::*fromElemMethod)()
-) {
+auto mapValuesToMemberMethod(
 	Container<
-		//ToElem
-		decltype((std::declval<FromElem>().*(std::declval<MemberMethodType>()))())
-		//typename MemberMethodPointer<MemberMethodType>::ReturnType
-	> to;
-	for (FromElem const & fromElem : from) {
-		to.insert(to.end(), (fromElem.*fromElemMethod)());
-	}
-	return to;
+		typename MemberMethodPointer<MemberMethodType>::ClassType
+	> const & from,
+	MemberMethodType fromElemMethod
+) {
+	return mapValues(from, [fromElemMethod](
+		typename MemberMethodPointer<MemberMethodType>::ClassType const & fromElem
+	) -> typename MemberMethodPointer<MemberMethodType>::ReturnType {
+		return (fromElem.*fromElemMethod)();
+	});
 }
 
 //https://stackoverflow.com/a/38894158

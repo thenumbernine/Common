@@ -82,7 +82,16 @@ int main() {
 		//does know return container template, so can auto-deduce
 		//however (for now) container must be single-template-param
 		auto y = Common::mapValues(v, [](std::string const & s) -> size_t { return s.size(); });
-		
-		auto z = Common::mapValuesToMemberMethod(v, &std::string::size);
+	
+		{
+			struct A {
+				int x = {};
+				A(int x_) : x(x_) {}
+			};
+			std::vector<A> i = {1,2,3};
+			auto z = Common::mapValuesToMemberField(i, &A::x);
+		}
+
+		auto u = Common::mapValuesToMemberMethod(v, &std::string::size);
 	}
 }
