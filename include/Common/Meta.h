@@ -41,13 +41,6 @@ struct FunctionFromTupleArgsImpl<Return_, std::tuple<ArgList...>> {
 template<typename Return, typename TupleArgList>
 using FunctionFromTupleArgs = typename FunctionFromTupleArgsImpl<Return, TupleArgList>::type;
 
-//building a Function from a Lambda
-
-template<typename Lambda>
-using FunctionFromLambda = Common::Function<
-	typename std::remove_pointer<decltype(+Lambda())>::type
->;
-
 //for loop - compile-time indexes and execution of runtime code
 
 template<int index, int end, template<int> class Exec>
@@ -69,9 +62,9 @@ struct ForLoop<end, end, Exec> {
 
 //https://stackoverflow.com/a/43211852
 template<typename T> struct MemberPointer {};
-template<typename ClassType_, typename FieldType_>
-struct MemberPointer<FieldType_ ClassType_::*> {
-	using ClassType = ClassType_;
+template<typename Class_, typename FieldType_>
+struct MemberPointer<FieldType_ Class_::*> {
+	using Class = Class_;
 	using FieldType = FieldType_;
 };
 
@@ -80,34 +73,47 @@ struct MemberPointer<FieldType_ ClassType_::*> {
 
 template<typename T> struct MemberMethodPointer {};
 
-template<typename ClassType_, typename ReturnType_>
-struct MemberMethodPointer<ReturnType_ (ClassType_::*)()> {
+template<typename Class_, typename Return_, typename... Args>
+struct MemberMethodPointer<Return_ (Class_::*)(Args...)> {
 	static constexpr bool is_const = false;
 	static constexpr bool is_noexcept = false;
-	using ClassType = ClassType_;
-	using ReturnType = ReturnType_;
+	using Class = Class_;
+	using Return = Return_;
+	//"FuncType" is what I'm using in Function above for the std::function<> wrapper type
+	// in Function above I'm just calling "Type" the C function type, but here Type should be the member method type ...
+	// so I'll call this "CFunc"
+	using CFunc = Return_(Args...);
 };
-template<typename ClassType_, typename ReturnType_>
-struct MemberMethodPointer<ReturnType_ (ClassType_::*)() noexcept> {
+template<typename Class_, typename Return_, typename... Args>
+struct MemberMethodPointer<Return_ (Class_::*)(Args...) noexcept> {
 	static constexpr bool is_const = false;
 	static constexpr bool is_noexcept = true;
-	using ClassType = ClassType_;
-	using ReturnType = ReturnType_;
+	using Class = Class_;
+	using Return = Return_;
+	using CFunc = Return_(Args...);
 };
-template<typename ClassType_, typename ReturnType_>
-struct MemberMethodPointer<ReturnType_ (ClassType_::*)() const> {
+template<typename Class_, typename Return_, typename... Args>
+struct MemberMethodPointer<Return_ (Class_::*)(Args...) const> {
 	static constexpr bool is_const = true;
 	static constexpr bool is_noexcept = false;
-	using ClassType = ClassType_;
-	using ReturnType = ReturnType_;
+	using Class = Class_;
+	using Return = Return_;
+	using CFunc = Return_(Args...);
 };
-template<typename ClassType_, typename ReturnType_>
-struct MemberMethodPointer<ReturnType_ (ClassType_::*)() const noexcept> {
+template<typename Class_, typename Return_, typename... Args>
+struct MemberMethodPointer<Return_ (Class_::*)(Args...) const noexcept> {
 	static constexpr bool is_const = true;
 	static constexpr bool is_noexcept = true;
-	using ClassType = ClassType_;
-	using ReturnType = ReturnType_;
+	using Class = Class_;
+	using Return = Return_;
+	using CFunc = Return_(Args...);
 };
+
+// function from lambda
+
+// get a Function<> above for the signature of a lambda based on its operator() member method
+template<typename Lambda>
+using FunctionFromLambda = Function<typename MemberMethodPointer<decltype(&Lambda::operator())>::CFunc>;
 
 // https://stackoverflow.com/a/6894436/2714073
 // return 'true' to stop early
@@ -251,17 +257,17 @@ Container<ToElem> mapValuesToMemberField(
 
 template<
 	template<typename...> typename Container,
-	typename MemberMethodType
+	typename MemberMethod
 >
 auto mapValuesToMemberMethod(
 	Container<
-		typename MemberMethodPointer<MemberMethodType>::ClassType
+		typename MemberMethodPointer<MemberMethod>::Class
 	> const & from,
-	MemberMethodType fromElemMethod
+	MemberMethod fromElemMethod
 ) {
 	return mapValues(from, [fromElemMethod](
-		typename MemberMethodPointer<MemberMethodType>::ClassType const & fromElem
-	) -> typename MemberMethodPointer<MemberMethodType>::ReturnType {
+		typename MemberMethodPointer<MemberMethod>::Class const & fromElem
+	) -> typename MemberMethodPointer<MemberMethod>::Return {
 		return (fromElem.*fromElemMethod)();
 	});
 }
