@@ -275,17 +275,16 @@ auto mapValuesToMemberMethod(
 //https://stackoverflow.com/a/38894158
 // but i switched template args T and I so they match array and my own vec
 template <typename T, size_t I>
-struct tuple_of_same_type_recurse{
+struct tuple_rep_impl{
     template< typename...Args>
-	using type = typename tuple_of_same_type_recurse<T, I-1>::template type<T, Args...>;
+	using type = typename tuple_rep_impl<T, I-1>::template type<T, Args...>;
 };
 template <typename T>
-struct tuple_of_same_type_recurse<T, 0> {
+struct tuple_rep_impl<T, 0> {
     template<typename...Args>
 	using type = std::tuple<Args...>;
 };
-
 template <typename T, size_t I>
-using tuple_of_same_type = typename tuple_of_same_type_recurse<T,I>::template type<>;
+using tuple_rep_t = typename tuple_rep_impl<T,I>::template type<>;
 
 }
