@@ -14,7 +14,7 @@ namespace Test {
 
 	static_assert(
 		std::is_same_v<
-			sequence_cat_t<
+			seq_cat_t<
 				std::integer_sequence<int, 1>,
 				std::integer_sequence<int, 2,3>
 				//std::integer_sequence<size_t, 2,3>	//types have to match or you get a compilererror
@@ -23,12 +23,12 @@ namespace Test {
 		>
 	);
 
-	static_assert(std::is_same_v<sequence_set_t<std::index_sequence<2>, 0, 3>, std::index_sequence<3>>);
-	static_assert(std::is_same_v<sequence_set_t<std::index_sequence<1, 2>, 0, 3>, std::index_sequence<3, 2>>);
-	static_assert(std::is_same_v<sequence_set_t<std::index_sequence<1, 2>, 1, 3>, std::index_sequence<1, 3>>);
-	static_assert(std::is_same_v<sequence_set_t<std::index_sequence<7, 5, 9>, 0, 3>, std::index_sequence<3, 5, 9>>);
-	static_assert(std::is_same_v<sequence_set_t<std::index_sequence<7, 5, 9>, 1, 3>, std::index_sequence<7, 3, 9>>);
-	static_assert(std::is_same_v<sequence_set_t<std::index_sequence<7, 5, 9>, 2, 3>, std::index_sequence<7, 5, 3>>);
+	static_assert(std::is_same_v<seq_set_t<std::index_sequence<2>, 0, 3>, std::index_sequence<3>>);
+	static_assert(std::is_same_v<seq_set_t<std::index_sequence<1, 2>, 0, 3>, std::index_sequence<3, 2>>);
+	static_assert(std::is_same_v<seq_set_t<std::index_sequence<1, 2>, 1, 3>, std::index_sequence<1, 3>>);
+	static_assert(std::is_same_v<seq_set_t<std::index_sequence<7, 5, 9>, 0, 3>, std::index_sequence<3, 5, 9>>);
+	static_assert(std::is_same_v<seq_set_t<std::index_sequence<7, 5, 9>, 1, 3>, std::index_sequence<7, 3, 9>>);
+	static_assert(std::is_same_v<seq_set_t<std::index_sequence<7, 5, 9>, 2, 3>, std::index_sequence<7, 5, 3>>);
 
 	static_assert(constexpr_min(1,2) == 1);
 	static_assert(constexpr_min(4,3) == 3);
@@ -40,12 +40,12 @@ namespace Test {
 	static_assert(variadic_min_v<short,5,3,8> == 3);
 	static_assert(variadic_min_v<short,9,5,1> == 1);
 
-	static_assert(sequence_min_v<std::index_sequence<7>> == 7);
-	static_assert(sequence_min_v<std::index_sequence<3,8>> == 3);
-	static_assert(sequence_min_v<std::integer_sequence<int,9,1>> == 1);
-	static_assert(sequence_min_v<std::integer_sequence<int,2,4,8>> == 2);
-	static_assert(sequence_min_v<std::integer_sequence<short,5,3,8>> == 3);
-	static_assert(sequence_min_v<std::integer_sequence<short,9,5,1>> == 1);
+	static_assert(seq_min_v<std::index_sequence<7>> == 7);
+	static_assert(seq_min_v<std::index_sequence<3,8>> == 3);
+	static_assert(seq_min_v<std::integer_sequence<int,9,1>> == 1);
+	static_assert(seq_min_v<std::integer_sequence<int,2,4,8>> == 2);
+	static_assert(seq_min_v<std::integer_sequence<short,5,3,8>> == 3);
+	static_assert(seq_min_v<std::integer_sequence<short,9,5,1>> == 1);
 
 	//static_assert(variadic_min_loc_v<size_t,> == 0); // should error
 	static_assert(variadic_min_loc_v<size_t,7> == 0);
@@ -55,17 +55,17 @@ namespace Test {
 	static_assert(variadic_min_loc_v<size_t,5,3,8> == 1);
 	static_assert(variadic_min_loc_v<size_t,9,5,1> == 2);
 
-	static_assert(sequence_min_loc_v<std::index_sequence<3>> == 0);
-	static_assert(sequence_get_v<sequence_min_loc_v<std::index_sequence<3>>, std::index_sequence<3>> == 3);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<1>>, std::index_sequence<1>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<3,4>>, std::index_sequence<3,4>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<4,3>>, std::index_sequence<3,4>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<2,5,8>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<2,8,5>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<5,2,8>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<5,8,2>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<8,2,5>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<8,5,2>>, std::index_sequence<2,5,8>>);
+	static_assert(seq_min_loc_v<std::index_sequence<3>> == 0);
+	static_assert(seq_get_v<seq_min_loc_v<std::index_sequence<3>>, std::index_sequence<3>> == 3);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<1>>, std::index_sequence<1>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<3,4>>, std::index_sequence<3,4>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<4,3>>, std::index_sequence<3,4>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<2,5,8>>, std::index_sequence<2,5,8>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<2,8,5>>, std::index_sequence<2,5,8>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<5,2,8>>, std::index_sequence<2,5,8>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<5,8,2>>, std::index_sequence<2,5,8>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<8,2,5>>, std::index_sequence<2,5,8>>);
+	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<8,5,2>>, std::index_sequence<2,5,8>>);
 }
 
 //for-loop
@@ -83,6 +83,8 @@ struct TestEq {
 };
 
 void testForLoop() {
+	//template-based for-loop
+	
 	Common::ForLoop<0, 2, TestEq>::exec("hello");
 	
 	//test Common::Function too , make sure it deduces the 'bool(string)' signature
@@ -94,7 +96,19 @@ void testForLoop() {
 	Common::ForLoop<0, 1, TestEq>::exec("hello");
 	
 	Common::ForLoop<0, 0, TestEq>::exec("hello");
+
+	// constexpr-based for-loop over tuples
+
+	Common::TupleForEach(std::make_tuple("a", 2.5, 'c'), [](auto x, size_t i) constexpr -> bool {
+		std::cout << "TupleForEach " << i << "'th is " << x << std::endl;
+		return false; // false == continue, true == break
+	});
 	
+	using S = std::index_sequence<1,2,3>;
+	Common::for_seq<S>([](size_t i) constexpr -> bool {
+		std::cout << "foreach_seq " << i << "'th" << std::endl;
+		return false;
+	});
 }
 
 int test(double, char) { return 0; }

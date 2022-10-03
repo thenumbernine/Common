@@ -1,13 +1,14 @@
 #pragma once
 
-#include <functional>
-#include <tuple>
+#include <functional>	//function<>
+#include <tuple>		//tuple<>
+#include <utility>		//integer_sequence<>
 
 namespace Common {
 
 //common metaprograms
 // ok just calling everything "Common" isn't going to work
-// I'm going to need some folders like meta/function, meta/tuple, meta/variadic, meta/sequence
+// I'm going to need some folders like meta/function, meta/tuple, meta/variadic, meta/seq
 
 
 //function parameters
@@ -120,12 +121,12 @@ using FunctionFromLambda = Function<typename MemberMethodPointer<decltype(&Lambd
 // https://stackoverflow.com/a/6894436/2714073
 // return 'true' to stop early
 template<std::size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if_t<I == sizeof...(Tp), bool>
-TupleForEach(std::tuple<Tp...> const &, FuncT) { return {}; }
+requires(I == sizeof...(Tp))
+bool TupleForEach(std::tuple<Tp...> const &, FuncT) { return {}; }
 
 template<std::size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if_t<I < sizeof...(Tp), bool>
-TupleForEach(std::tuple<Tp...> const & t, FuncT f) {
+requires(I < sizeof...(Tp))
+bool TupleForEach(std::tuple<Tp...> const & t, FuncT f) {
 	if (f(std::get<I>(t), I)) return true;
 	return TupleForEach<I + 1, FuncT, Tp...>(t, f);
 }
@@ -293,9 +294,9 @@ using tuple_rep_t = typename tuple_rep_impl<T,I>::template type<>;
 get the i'th value from a template variadic arg list of values
 https://cplusplus.com/forum/general/241535/#msg1073933
 constexpr T variadic_get_v<index, T, Ts...>
-T = the type of the sequence,
+T = the type of the seq,
 index = which index to get
-Ts... = the sequence
+Ts... = the seq
 was thinking of putting the template type as the first arg, so ordrer matched a C++ declaration-assignment  statement, 
  but then put the template type as the 2nd arg, so you can just inject the integer_sequence template args into the variadic_get args
 */
@@ -317,22 +318,22 @@ template<size_t i, typename T, T... Ts>
 constexpr T variadic_get_v = variadic_get<i, T, Ts...>::value;
 
 // get the i'th value from an index_sequence
-// I'm putting that sequence-type last so I can default use the integer_sequence type
+// I'm putting that seq-type last so I can default use the integer_sequence type
 
 template<size_t i, typename T, typename R = typename T::value_type>
-constexpr R sequence_get_v = {};
+constexpr R seq_get_v = {};
 
 template<size_t i, typename T, T... I>
-constexpr T sequence_get_v<i, std::index_sequence<I...>> = variadic_get_v<i, T, I...>;
+constexpr T seq_get_v<i, std::index_sequence<I...>> = variadic_get_v<i, T, I...>;
 
 // concat index_sequence
 //https://devblogs.microsoft.com/oldnewthing/20200625-00/?p=103903
 
 template<typename Seq1, typename Seq>
-struct sequence_cat;
+struct seq_cat;
 
 template<typename T, T... Ints1, T... Ints2>
-struct sequence_cat<
+struct seq_cat<
 	std::integer_sequence<T, Ints1...>,
 	std::integer_sequence<T, Ints2...>
 > {
@@ -340,38 +341,38 @@ struct sequence_cat<
 };
 
 template<typename Seq1, typename Seq2>
-using sequence_cat_t = typename sequence_cat<Seq1, Seq2>::type;
+using seq_cat_t = typename seq_cat<Seq1, Seq2>::type;
 
 // set the i'th value of an index_sequence
 
 template<typename R, R value, size_t i, typename T>
-struct sequence_set;
+struct seq_set;
 
 template<typename R, R value, size_t i, R first, R... rest>
-struct sequence_set<R, value, i, std::integer_sequence<R, first, rest...>> {
-	using type = sequence_cat_t<
+struct seq_set<R, value, i, std::integer_sequence<R, first, rest...>> {
+	using type = seq_cat_t<
 		std::integer_sequence<R, first>,
-		typename sequence_set<R, value, i-1, std::integer_sequence<R, rest...>>::type
+		typename seq_set<R, value, i-1, std::integer_sequence<R, rest...>>::type
 	>;
 };
 
 template<typename R, R value, R first, R... rest>
-struct sequence_set<R, value, 0, std::integer_sequence<R, first, rest...>> {
-	using type = sequence_cat_t<
+struct seq_set<R, value, 0, std::integer_sequence<R, first, rest...>> {
+	using type = seq_cat_t<
 		std::integer_sequence<R, value>,
 		std::integer_sequence<R, rest...>
 	>;
 };
 
 template<typename R, R value, R first>
-struct sequence_set<R, value, 0, std::integer_sequence<R, first>> {
+struct seq_set<R, value, 0, std::integer_sequence<R, first>> {
 	using type = std::integer_sequence<R, value>;
 };
 
 // for value's type to be dependent on T, value has to go last (unless you put the index last?
-// sequence_set_t<seq, i, value> <=> seq[i] = value
+// seq_set_t<seq, i, value> <=> seq[i] = value
 template<typename T, size_t i, typename T::value_type value>
-using sequence_set_t = typename sequence_set<typename T::value_type, value, i, T>::type;
+using seq_set_t = typename seq_set<typename T::value_type, value, i, T>::type;
 
 // constexpr min(a,b)
 
@@ -399,10 +400,10 @@ constexpr T variadic_min_v = variadic_min<T, I...>::value;
 // index_sequence min value
 
 template<typename T>
-constexpr typename T::value_type sequence_min_v = {};
+constexpr typename T::value_type seq_min_v = {};
 
 template<typename T, T... I>
-constexpr T sequence_min_v<std::integer_sequence<T, I...>> = variadic_min_v<T, I...>;
+constexpr T seq_min_v<std::integer_sequence<T, I...>> = variadic_min_v<T, I...>;
 
 // get the *LOCATION* of the min value in a variadic
 
@@ -443,36 +444,36 @@ constexpr size_t variadic_min_loc_v = variadic_min_loc<T, I...>::value();
 // index_sequence min loc
 
 template<typename T>
-constexpr size_t sequence_min_loc_v = {};
+constexpr size_t seq_min_loc_v = {};
 
 template<typename T, T... I>
-constexpr size_t sequence_min_loc_v<std::integer_sequence<T, I...>> = variadic_min_loc_v<T, I...>;
+constexpr size_t seq_min_loc_v<std::integer_sequence<T, I...>> = variadic_min_loc_v<T, I...>;
 
-// sequence get 2nd- to end
+// seq get 2nd- to end
 
 template<typename T>
-struct sequence_pop_front;
+struct seq_pop_front;
 
 template<typename T, T i, T... I>
-struct sequence_pop_front<std::integer_sequence<T, i, I...>> {
+struct seq_pop_front<std::integer_sequence<T, i, I...>> {
 	using type = std::integer_sequence<T, I...>;
 };
 
 template<typename T, T i>
-struct sequence_pop_front<std::integer_sequence<T, i>> {
+struct seq_pop_front<std::integer_sequence<T, i>> {
 	using type = std::integer_sequence<T>;
 };
 
 template<typename T>
-using sequence_pop_front_t = typename sequence_pop_front<T>::type;
+using seq_pop_front_t = typename seq_pop_front<T>::type;
 
 // sort index_sequence
 
 template<typename T>
-struct sequence_sort;
+struct seq_sort;
 
 template<typename R, R i1, R... I>
-struct sequence_sort<std::integer_sequence<R, i1, I...>> {
+struct seq_sort<std::integer_sequence<R, i1, I...>> {
 	using seq = std::integer_sequence<R, i1, I...>;
 	using rest = std::integer_sequence<R, I...>;
 	static constexpr auto value() {		//output type is decltype(value())
@@ -480,28 +481,56 @@ struct sequence_sort<std::integer_sequence<R, i1, I...>> {
 		constexpr R ij = variadic_get_v<j, R, I...>;
 		if constexpr (i1 > ij) {
 			//set ij in the rest
-			using rest_set_i = sequence_set_t<rest, j, i1>;
+			using rest_set_i = seq_set_t<rest, j, i1>;
 			// sort the rest
-			using rest_set_i_sorted = decltype(sequence_sort<rest_set_i>::value());
+			using rest_set_i_sorted = decltype(seq_sort<rest_set_i>::value());
 			// then prepend the first element
-			using sorted = sequence_cat_t<std::integer_sequence<R, ij>, rest_set_i_sorted>;
+			using sorted = seq_cat_t<std::integer_sequence<R, ij>, rest_set_i_sorted>;
 			return sorted();
 		} else {
 			// i1 is good, sort I...
-			return sequence_cat_t<
+			return seq_cat_t<
 				std::integer_sequence<R, i1>,
-				decltype(sequence_sort<std::integer_sequence<R, I...>>::value())
+				decltype(seq_sort<std::integer_sequence<R, I...>>::value())
 			>();
 		}
 	}
 };
 template<typename R, R i>
-struct sequence_sort<std::integer_sequence<R, i>> {
+struct seq_sort<std::integer_sequence<R, i>> {
 	using type = std::integer_sequence<R, i>;
 	static constexpr auto value() { return type(); }
 };
 
 template<typename T>
-using sequence_sort_t = decltype(sequence_sort<T>::value());
+using seq_sort_t = decltype(seq_sort<T>::value());
+
+// seq compile time for loop
+
+template<typename T>
+struct for_seq_impl;
+
+template<typename T, T i, T... I>
+struct for_seq_impl<std::integer_sequence<T, i, I...>> {
+	template<typename F>
+	static constexpr bool exec(F f) {
+		if (f(i)) return true;
+		return for_seq_impl<std::integer_sequence<T,I...>>::exec(f);
+	}
+};
+
+template<typename T, T i>
+struct for_seq_impl<std::integer_sequence<T, i>> {
+	template<typename F>
+	static constexpr bool exec(F f) {
+		return f(i);
+	}
+};
+
+// T is the sequence type and has to go first
+template<typename T, typename F>
+constexpr bool for_seq(F f) {
+	return for_seq_impl<T>::template exec<F>(f);
+}
 
 }
