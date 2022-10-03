@@ -66,6 +66,19 @@ namespace Test {
 	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<5,8,2>>, std::index_sequence<2,5,8>>);
 	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<8,2,5>>, std::index_sequence<2,5,8>>);
 	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<8,5,2>>, std::index_sequence<2,5,8>>);
+
+	static_assert(std::is_same_v<
+		std::index_sequence<2>,
+		seq_reverse_t<std::index_sequence<2>>
+	>);
+	static_assert(std::is_same_v<
+		std::index_sequence<2,4>,
+		seq_reverse_t<std::index_sequence<4,2>>
+	>);
+	static_assert(std::is_same_v<
+		std::index_sequence<9,4,5>,
+		seq_reverse_t<std::index_sequence<5,4,9>>
+	>);
 }
 
 //for-loop

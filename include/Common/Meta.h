@@ -533,4 +533,26 @@ constexpr bool for_seq(F f) {
 	return for_seq_impl<T>::template exec<F>(f);
 }
 
+// sequence reverse 
+
+template<typename T>
+struct seq_reverse_impl;
+template<typename T, T first, T... Rest>
+struct seq_reverse_impl<std::integer_sequence<T, first, Rest...>> {
+	using seq_first = std::integer_sequence<T, first>;
+	using rest = std::integer_sequence<T, Rest...>;
+	using rest_reversed = seq_reverse_impl<rest>::type;
+	using type = Common::seq_cat_t<rest_reversed, seq_first>;
+};
+template<typename T, T i1, T i2>
+struct seq_reverse_impl<std::integer_sequence<T, i1, i2>> {
+	using type = std::integer_sequence<T, i2, i1>;
+};
+template<typename T, T i>
+struct seq_reverse_impl<std::integer_sequence<T, i>> {
+	using type = std::integer_sequence<T, i>;
+};
+template<typename T>
+using seq_reverse_t = typename seq_reverse_impl<T>::type;
+
 }
