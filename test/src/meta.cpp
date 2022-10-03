@@ -25,7 +25,7 @@ void testForLoop() {
 	//test Common::Function too , make sure it deduces the 'bool(string)' signature
 	static_assert((std::is_same_v<
 		Common::Function<decltype(TestEq<0>::exec)>,
-		Common::FunctionFromTupleArgs<bool, Common::tuple_of_same_type<std::string const &, 1>>
+		Common::FunctionFromTupleArgs<bool, Common::tuple_rep_t<std::string const &, 1>>
 	>));
 	
 	Common::ForLoop<0, 1, TestEq>::exec("hello");
