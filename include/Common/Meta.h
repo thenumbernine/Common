@@ -290,36 +290,41 @@ template <typename T, size_t I>
 using tuple_rep_t = typename tuple_rep_impl<T,I>::template type<>;
 
 
-// get the i'th value from a template variadic arg list of values
-// https://cplusplus.com/forum/general/241535/#msg1073933
+/*
+get the i'th value from a template variadic arg list of values
+https://cplusplus.com/forum/general/241535/#msg1073933
+constexpr T variadic_get_v<index, T, Ts...>
+T = the type of the sequence,
+index = which index to get
+Ts... = the sequence
+was thinking of putting the template type as the first arg, so ordrer matched a C++ declaration-assignment  statement, 
+ but then put the template type as the 2nd arg, so you can just inject the integer_sequence template args into the variadic_get args
+*/
 
-template<size_t i, size_t... is>
+template<size_t i, typename T, T... Ts>
 struct variadic_get;
 
-template<size_t i, size_t first, size_t... rest>
-struct variadic_get<i, first, rest...> {
-	static constexpr size_t value = variadic_get<i-1, rest...>::value;
+template<size_t i, typename T, T first, T... rest>
+struct variadic_get<i, T, first, rest...> {
+	static constexpr T value = variadic_get<i-1, T, rest...>::value;
 };
 
-template<size_t first, size_t... rest>
-struct variadic_get<0, first, rest...> {
-	static constexpr size_t value = first;
+template<typename T, T first, T... rest>
+struct variadic_get<0, T, first, rest...> {
+	static constexpr T value = first;
 };
 
-template<size_t... i>
-constexpr size_t variadic_get_v = variadic_get<i...>::value;
-
-static_assert(variadic_get_v<0,1> == 1);
-static_assert(variadic_get_v<0,1,2> == 1);
-static_assert(variadic_get_v<1,1,2> == 2);
+template<size_t i, typename T, T... Ts>
+constexpr T variadic_get_v = variadic_get<i, T, Ts...>::value;
 
 // get the i'th value from an index_sequence
+// I'm putting that sequence-type last so I can default use the integer_sequence type
 
-template<size_t i, typename T>
-constexpr size_t sequence_get_v = {};
+template<size_t i, typename T, typename R = typename T::value_type>
+constexpr R sequence_get_v = {};
 
-template<size_t i, size_t... I>
-constexpr size_t sequence_get_v<i, std::index_sequence<I...>> = variadic_get_v<i, I...>;
+template<size_t i, typename T, T... I>
+constexpr T sequence_get_v<i, std::index_sequence<I...>> = variadic_get_v<i, T, I...>;
 
 // concat index_sequence
 //https://devblogs.microsoft.com/oldnewthing/20200625-00/?p=103903
@@ -327,119 +332,95 @@ constexpr size_t sequence_get_v<i, std::index_sequence<I...>> = variadic_get_v<i
 template<typename Seq1, typename Seq>
 struct sequence_cat;
 
-template<std::size_t... Ints1, std::size_t... Ints2>
+template<typename T, T... Ints1, T... Ints2>
 struct sequence_cat<
-	std::index_sequence<Ints1...>,
-	std::index_sequence<Ints2...>
+	std::integer_sequence<T, Ints1...>,
+	std::integer_sequence<T, Ints2...>
 > {
-	using type = std::index_sequence<Ints1..., Ints2...>;
+	using type = std::integer_sequence<T, Ints1..., Ints2...>;
 };
 
 template<typename Seq1, typename Seq2>
 using sequence_cat_t = typename sequence_cat<Seq1, Seq2>::type;
 
-static_assert(
-	std::is_same_v<
-		sequence_cat_t<
-			std::index_sequence<1>,
-			std::index_sequence<2,3>
-		>,
-		std::index_sequence<1,2,3>
-	>
-);
-
 // set the i'th value of an index_sequence
 
-template<size_t value, size_t i, typename T>
+template<typename R, R value, size_t i, typename T>
 struct sequence_set;
 
-template<size_t value, size_t i, size_t first, size_t... rest>
-struct sequence_set<value, i, std::index_sequence<first, rest...>> {
+template<typename R, R value, size_t i, R first, R... rest>
+struct sequence_set<R, value, i, std::integer_sequence<R, first, rest...>> {
 	using type = sequence_cat_t<
-		std::index_sequence<first>,
-		typename sequence_set<value, i-1, std::index_sequence<rest...>>::type
+		std::integer_sequence<R, first>,
+		typename sequence_set<R, value, i-1, std::integer_sequence<R, rest...>>::type
 	>;
 };
 
-template<size_t value, size_t first, size_t... rest>
-struct sequence_set<value, 0, std::index_sequence<first, rest...>> {
+template<typename R, R value, R first, R... rest>
+struct sequence_set<R, value, 0, std::integer_sequence<R, first, rest...>> {
 	using type = sequence_cat_t<
-		std::index_sequence<value>,
-		std::index_sequence<rest...>
+		std::integer_sequence<R, value>,
+		std::integer_sequence<R, rest...>
 	>;
 };
 
-template<size_t value, size_t first>
-struct sequence_set<value, 0, std::index_sequence<first>> {
-	using type = std::index_sequence<value>;
+template<typename R, R value, R first>
+struct sequence_set<R, value, 0, std::integer_sequence<R, first>> {
+	using type = std::integer_sequence<R, value>;
 };
 
-template<size_t value, size_t i, typename T>
-using sequence_set_t = typename sequence_set<value, i, T>::type;
-
-static_assert(std::is_same_v<sequence_set_t<3, 0, std::index_sequence<2>>,std::index_sequence<3>>);
-static_assert(std::is_same_v<sequence_set_t<3, 0, std::index_sequence<1, 2>>, std::index_sequence<3, 2>>);
-static_assert(std::is_same_v<sequence_set_t<3, 1, std::index_sequence<1, 2>>, std::index_sequence<1, 3>>);
-static_assert(std::is_same_v<sequence_set_t<3, 0, std::index_sequence<7, 5, 9>>, std::index_sequence<3, 5, 9>>);
-static_assert(std::is_same_v<sequence_set_t<3, 1, std::index_sequence<7, 5, 9>>, std::index_sequence<7, 3, 9>>);
-static_assert(std::is_same_v<sequence_set_t<3, 2, std::index_sequence<7, 5, 9>>, std::index_sequence<7, 5, 3>>);
+// for value's type to be dependent on T, value has to go last (unless you put the index last?
+// sequence_set_t<seq, i, value> <=> seq[i] = value
+template<typename T, size_t i, typename T::value_type value>
+using sequence_set_t = typename sequence_set<typename T::value_type, value, i, T>::type;
 
 // constexpr min(a,b)
 
-constexpr size_t constexpr_min(size_t a, size_t b) {
+template<typename T>
+constexpr T constexpr_min(T a, T b) {
 	return a < b ? a : b;
 }
 
-static_assert(constexpr_min(1,2) == 1);
-static_assert(constexpr_min(4,3) == 3);
-
 // get the min value of a template variadic index
 
-template<size_t... I>
+template<typename T, T... I>
 struct variadic_min;
 
-template<size_t i1, size_t... I>
-struct variadic_min<i1, I...> {
-	static constexpr size_t value = constexpr_min(i1, variadic_min<I...>::value);
+template<typename T, T i1, T... I>
+struct variadic_min<T, i1, I...> {
+	static constexpr T value = constexpr_min<T>(i1, variadic_min<T, I...>::value);
 };
-template<size_t i>
-struct variadic_min<i> {
-	static constexpr size_t value = i;
+template<typename T, T i>
+struct variadic_min<T, i> {
+	static constexpr T value = i;
 };
-template<size_t... I>
-constexpr size_t variadic_min_v = variadic_min<I...>::value;
-
-static_assert(variadic_min_v<7> == 7);
-static_assert(variadic_min_v<3,8> == 3);
-static_assert(variadic_min_v<9,1> == 1);
-static_assert(variadic_min_v<2,4,8> == 2);
-static_assert(variadic_min_v<5,3,8> == 3);
-static_assert(variadic_min_v<9,5,1> == 1);
+template<typename T, T... I>
+constexpr T variadic_min_v = variadic_min<T, I...>::value;
 
 // index_sequence min value
 
-template<size_t i, typename T>
-constexpr size_t sequence_min_v = {};
+template<typename T>
+constexpr T::value_type sequence_min_v = {};
 
-template<size_t i, size_t... I>
-constexpr size_t sequence_min_v<i, std::index_sequence<I...>> = variadic_min_v<i, I...>;
+template<typename T, T... I>
+constexpr T sequence_min_v<std::integer_sequence<T, I...>> = variadic_min_v<T, I...>;
 
 // get the *LOCATION* of the min value in a variadic
 
-template<size_t... I>
+template<typename T, T... I>
 struct variadic_min_loc;
 
-template<size_t i1, size_t... I>
-struct variadic_min_loc<i1, I...> {
+template<typename T, T i1, T... I>
+struct variadic_min_loc<T, i1, I...> {
 	static constexpr size_t value() {
-		constexpr size_t j = variadic_min_loc<I...>::value();
-		constexpr size_t ij = variadic_get_v<j, I...>;
+		constexpr size_t j = variadic_min_loc<T, I...>::value();
+		constexpr T ij = variadic_get_v<j, T, I...>;
 		return (i1 < ij) ? 0 : j+1;
 	}
 };
 
-template<size_t i>
-struct variadic_min_loc<i> {
+template<typename T, T i>
+struct variadic_min_loc<T, i> {
 	static constexpr size_t value() { return 0; }
 };
 
@@ -457,38 +438,30 @@ struct variadic_min_loc<> {
 };
 #endif
 
-template<size_t... I>
-constexpr size_t variadic_min_loc_v = variadic_min_loc<I...>::value();
-
-//static_assert(variadic_min_loc_v<> == 0); // should error
-static_assert(variadic_min_loc_v<7> == 0);
-static_assert(variadic_min_loc_v<3,8> == 0);
-static_assert(variadic_min_loc_v<9,1> == 1);
-static_assert(variadic_min_loc_v<2,4,8> == 0);
-static_assert(variadic_min_loc_v<5,3,8> == 1);
-static_assert(variadic_min_loc_v<9,5,1> == 2);
+template<typename T, T... I>
+constexpr size_t variadic_min_loc_v = variadic_min_loc<T, I...>::value();
 
 // index_sequence min loc
 
 template<typename T>
 constexpr size_t sequence_min_loc_v = {};
 
-template<size_t... I>
-constexpr size_t sequence_min_loc_v<std::index_sequence<I...>> = variadic_min_loc_v<I...>;
+template<typename T, T... I>
+constexpr size_t sequence_min_loc_v<std::integer_sequence<T, I...>> = variadic_min_loc_v<T, I...>;
 
 // sequence get 2nd- to end
 
 template<typename T>
 struct sequence_pop_front;
 
-template<size_t i, size_t... I>
-struct sequence_pop_front<std::index_sequence<i, I...>> {
-	using type = std::index_sequence<I...>;
+template<typename T, T i, T... I>
+struct sequence_pop_front<std::integer_sequence<T, i, I...>> {
+	using type = std::integer_sequence<T, I...>;
 };
 
-template<size_t i>
-struct sequence_pop_front<std::index_sequence<i>> {
-	using type = std::index_sequence<>;
+template<typename T, T i>
+struct sequence_pop_front<std::integer_sequence<T, i>> {
+	using type = std::integer_sequence<T>;
 };
 
 template<typename T>
@@ -499,52 +472,37 @@ using sequence_pop_front_t = typename sequence_pop_front<T>::type;
 template<typename T>
 struct sequence_sort;
 
-template<size_t i1, size_t... I>
-struct sequence_sort<std::index_sequence<i1, I...>> {
-	using seq = std::index_sequence<i1, I...>;
-	using rest = std::index_sequence<I...>;
+template<typename R, R i1, R... I>
+struct sequence_sort<std::integer_sequence<R, i1, I...>> {
+	using seq = std::integer_sequence<R, i1, I...>;
+	using rest = std::integer_sequence<R, I...>;
 	static constexpr auto value() {		//output type is decltype(value())
-		constexpr size_t j = variadic_min_loc_v<I...>;	// index in subset, +1 for index in seq
-		constexpr size_t ij = variadic_get_v<j, I...>;
+		constexpr size_t j = variadic_min_loc_v<R, I...>;	// index in subset, +1 for index in seq
+		constexpr R ij = variadic_get_v<j, R, I...>;
 		if constexpr (i1 > ij) {
 			//set ij in the rest
-			using rest_set_i = sequence_set_t<i1, j, rest>;
+			using rest_set_i = sequence_set_t<rest, j, i1>;
 			// sort the rest
 			using rest_set_i_sorted = decltype(sequence_sort<rest_set_i>::value());
 			// then prepend the first element
-			using sorted = sequence_cat_t<std::index_sequence<ij>, rest_set_i_sorted>;
+			using sorted = sequence_cat_t<std::integer_sequence<R, ij>, rest_set_i_sorted>;
 			return sorted();
 		} else {
 			// i1 is good, sort I...
 			return sequence_cat_t<
-				std::index_sequence<i1>,
-				decltype(sequence_sort<std::index_sequence<I...>>::value())
+				std::integer_sequence<R, i1>,
+				decltype(sequence_sort<std::integer_sequence<R, I...>>::value())
 			>();
 		}
 	}
 };
-template<size_t i>
-struct sequence_sort<std::index_sequence<i>> {
-	using type = std::index_sequence<i>;
+template<typename R, R i>
+struct sequence_sort<std::integer_sequence<R, i>> {
+	using type = std::integer_sequence<R, i>;
 	static constexpr auto value() { return type(); }
 };
 
 template<typename T>
 using sequence_sort_t = decltype(sequence_sort<T>::value());
-
-static_assert(sequence_min_loc_v<std::index_sequence<3>> == 0);
-static_assert(sequence_get_v<sequence_min_loc_v<std::index_sequence<3>>, std::index_sequence<3>> == 3);
-static_assert(std::is_same_v<sequence_set_t<3, 0, std::index_sequence<3>>, std::index_sequence<3>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<1>>, std::index_sequence<1>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<3,4>>, std::index_sequence<3,4>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<4,3>>, std::index_sequence<3,4>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<2,5,8>>, std::index_sequence<2,5,8>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<2,8,5>>, std::index_sequence<2,5,8>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<5,2,8>>, std::index_sequence<2,5,8>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<5,8,2>>, std::index_sequence<2,5,8>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<8,2,5>>, std::index_sequence<2,5,8>>);
-static_assert(std::is_same_v<sequence_sort_t<std::index_sequence<8,5,2>>, std::index_sequence<2,5,8>>);
-
-
 
 }
