@@ -125,8 +125,7 @@ TupleForEach(std::tuple<Tp...> const &, FuncT) { return {}; }
 
 template<std::size_t I = 0, typename FuncT, typename... Tp>
 inline typename std::enable_if_t<I < sizeof...(Tp), bool>
-TupleForEach(std::tuple<Tp...> const & t, FuncT f)
-{
+TupleForEach(std::tuple<Tp...> const & t, FuncT f) {
 	if (f(std::get<I>(t), I)) return true;
 	return TupleForEach<I + 1, FuncT, Tp...>(t, f);
 }
@@ -400,7 +399,7 @@ constexpr T variadic_min_v = variadic_min<T, I...>::value;
 // index_sequence min value
 
 template<typename T>
-constexpr T::value_type sequence_min_v = {};
+constexpr typename T::value_type sequence_min_v = {};
 
 template<typename T, T... I>
 constexpr T sequence_min_v<std::integer_sequence<T, I...>> = variadic_min_v<T, I...>;
