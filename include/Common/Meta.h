@@ -541,7 +541,7 @@ template<typename T, T first, T... Rest>
 struct seq_reverse_impl<std::integer_sequence<T, first, Rest...>> {
 	using seq_first = std::integer_sequence<T, first>;
 	using rest = std::integer_sequence<T, Rest...>;
-	using rest_reversed = seq_reverse_impl<rest>::type;
+	using rest_reversed = typename seq_reverse_impl<rest>::type;
 	using type = Common::seq_cat_t<rest_reversed, seq_first>;
 };
 template<typename T, T i1, T i2>
