@@ -1,5 +1,9 @@
 #include "Common/Test.h"
 #include "Common/Meta.h"
+#include "Common/Variadic.h"
+#include "Common/Sequence.h"
+#include "Common/Function.h"
+#include "Common/ForLoop.h"
 #include <iostream>
 #include <type_traits>
 #include <map>
