@@ -51,7 +51,7 @@ struct ForLoop {
 	template<typename... InputArgs>
 	static bool exec(InputArgs&&... input) {
 		if (Exec<index>::exec(std::forward<InputArgs>(input)...)) return true;
-		return ForLoop<index+step,end,Exec>::exec(std::forward<InputArgs>(input)...);
+		return ForLoop<index+step,end,Exec,step>::exec(std::forward<InputArgs>(input)...);
 	}
 };
 

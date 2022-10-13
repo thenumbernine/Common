@@ -109,6 +109,9 @@ void testForLoop() {
 	Common::ForLoop<0, 1, TestEq>::exec("hello");
 	
 	Common::ForLoop<0, 0, TestEq>::exec("hello");
+	
+	Common::ForLoop<1, 0, TestEq, -1>::exec("hello");
+	Common::ForLoop<1, -1, TestEq, -1>::exec("hello");
 
 	// constexpr-based for-loop over tuples
 
