@@ -95,6 +95,14 @@ struct TestEq {
 	}
 };
 
+template<int i> 
+struct ForSeqTest {
+	static bool exec() {
+		std::cout << "for_seq " << i << std::endl;
+		return false;
+	}
+};
+
 void testForLoop() {
 	//template-based for-loop
 	
@@ -121,10 +129,12 @@ void testForLoop() {
 	});
 	
 	using S = std::index_sequence<1,2,3>;
-	Common::for_seq<S>([](size_t i) constexpr -> bool {
-		std::cout << "foreach_seq " << i << "'th" << std::endl;
+	Common::for_seq_runtime<S>([](size_t i) constexpr -> bool {
+		std::cout << "for_seq_runtime " << i << "'th" << std::endl;
 		return false;
 	});
+
+	Common::for_seq<std::make_index_sequence<4>, ForSeqTest>();
 }
 
 int test(double, char) { return 0; }

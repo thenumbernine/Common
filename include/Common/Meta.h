@@ -508,19 +508,19 @@ using seq_sort_t = decltype(seq_sort<T>::value());
 // seq compile time for loop
 
 template<typename T>
-struct for_seq_impl;
+struct for_seq_runtime_impl;
 
 template<typename T, T i, T... I>
-struct for_seq_impl<std::integer_sequence<T, i, I...>> {
+struct for_seq_runtime_impl<std::integer_sequence<T, i, I...>> {
 	template<typename F>
 	static constexpr bool exec(F f) {
 		if (f(i)) return true;
-		return for_seq_impl<std::integer_sequence<T,I...>>::exec(f);
+		return for_seq_runtime_impl<std::integer_sequence<T,I...>>::exec(f);
 	}
 };
 
 template<typename T, T i>
-struct for_seq_impl<std::integer_sequence<T, i>> {
+struct for_seq_runtime_impl<std::integer_sequence<T, i>> {
 	template<typename F>
 	static constexpr bool exec(F f) {
 		return f(i);
@@ -529,8 +529,34 @@ struct for_seq_impl<std::integer_sequence<T, i>> {
 
 // T is the sequence type and has to go first
 template<typename T, typename F>
-constexpr bool for_seq(F f) {
-	return for_seq_impl<T>::template exec<F>(f);
+constexpr bool for_seq_runtime(F f) {
+	return for_seq_runtime_impl<T>::template exec<F>(f);
+}
+
+// seq compile time for loop with template arg
+
+template<typename T, template<int> typename F>
+struct for_seq_impl;
+
+template<typename T, T i, T... I, template<int> typename F>
+struct for_seq_impl<std::integer_sequence<T, i, I...>, F> {
+	static constexpr bool exec() {
+		if (F<i>::exec()) return true;
+		return for_seq_impl<std::integer_sequence<T,I...>, F>::exec();
+	}
+};
+
+template<typename T, template<int> typename F>
+struct for_seq_impl<std::integer_sequence<T>, F> {
+	static constexpr bool exec() {
+		return false;
+	}
+};
+
+// T is the sequence type and has to go first
+template<typename T, template<int> typename F>
+constexpr bool for_seq() {
+	return for_seq_impl<T, F>::exec();
 }
 
 // sequence reverse 
