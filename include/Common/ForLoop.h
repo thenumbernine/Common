@@ -7,7 +7,7 @@ namespace Common {
 
 //for loop - compile-time indexes and execution of runtime code
 
-template<int index, int end, template<int> class Exec, int step = 1>
+template<int index, int end, template<int> class Exec, int step = (end > index ? 1 : -1)>
 struct ForLoop {
 	template<typename... InputArgs>
 	static bool exec(InputArgs&&... input) {
