@@ -1,6 +1,7 @@
 #pragma once
 
 //macros for unit tests
+// TODO exception-on-fail optional
 
 #include "Common/Exception.h"
 

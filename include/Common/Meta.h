@@ -46,17 +46,17 @@ using FunctionFromTupleArgs = typename FunctionFromTupleArgsImpl<Return, TupleAr
 
 //for loop - compile-time indexes and execution of runtime code
 
-template<int index, int end, template<int> class Exec>
+template<int index, int end, template<int> class Exec, int step = 1>
 struct ForLoop {
 	template<typename... InputArgs>
 	static bool exec(InputArgs&&... input) {
 		if (Exec<index>::exec(std::forward<InputArgs>(input)...)) return true;
-		return ForLoop<index+1,end,Exec>::exec(std::forward<InputArgs>(input)...);
+		return ForLoop<index+step,end,Exec>::exec(std::forward<InputArgs>(input)...);
 	}
 };
 
-template<int end, template<int> class Exec>
-struct ForLoop<end, end, Exec> {
+template<int end, template<int> class Exec, int step>
+struct ForLoop<end, end, Exec, step> {
 	template<typename... InputArgs>
 	static bool exec(InputArgs&&... input) {
 		return false;
