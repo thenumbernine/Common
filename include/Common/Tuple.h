@@ -1,6 +1,8 @@
 #pragma once
 
 #include <tuple>
+#include <cstddef>	//size_t
+
 namespace Common {
 
 //https://stackoverflow.com/a/38894158
