@@ -10,7 +10,7 @@ namespace Common {
 template<int index, int end, template<int> class Exec, int step = (end > index ? 1 : -1)>
 struct ForLoop {
 	template<typename... InputArgs>
-	static bool exec(InputArgs&&... input) {
+	static constexpr bool exec(InputArgs&&... input) {
 		if (Exec<index>::exec(std::forward<InputArgs>(input)...)) return true;
 		return ForLoop<index+step,end,Exec,step>::exec(std::forward<InputArgs>(input)...);
 	}
@@ -19,7 +19,7 @@ struct ForLoop {
 template<int end, template<int> class Exec, int step>
 struct ForLoop<end, end, Exec, step> {
 	template<typename... InputArgs>
-	static bool exec(InputArgs&&... input) {
+	static constexpr bool exec(InputArgs&&... input) {
 		return false;
 	}
 };
