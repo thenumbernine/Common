@@ -11,7 +11,6 @@ namespace Common {
 // ok just calling everything "Common" isn't going to work
 // I'm going to need some folders like meta/function, meta/tuple, meta/variadic, meta/seq
 
-// TODO put in Common/Meta.h
 template<typename T, typename... Args>
 concept is_all_v =
 	sizeof...(Args) > 0
