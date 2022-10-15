@@ -152,7 +152,11 @@ std::string to_string(std::vector<T> const & x) {
 }
 
 //if a typename has 'fields' then std::to_string will use objectStringFromOStream
-template<typename T> requires Common::has_fields_v<T>
+template<typename T>
+requires (
+	Common::has_fields_v<T>
+	&& !Common::has_dontUseFieldsOStream_v<T> 
+)
 std::string to_string(T const & x) {
 	return Common::objectStringFromOStream(x);
 }
