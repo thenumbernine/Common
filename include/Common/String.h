@@ -28,6 +28,11 @@ namespace Common {
 template<typename T>
 constexpr bool has_to_ostream_v = requires(T const & t) { &T::to_ostream; };
 
+// add static constexpr auto dontUseFieldsOStream to prevent automatic ostream<<  use from your class with its 'fields' static tuple
+// is this getting out of hand?
+template<typename T>
+constexpr bool has_dontUseFieldsOStream_v = requires(T const & t) { T::dontUseFieldsOStream; };
+
 }
 
 /*
@@ -49,7 +54,11 @@ std::ostream & operator<<(std::ostream & o, T const & t) {
 //default ostream operator<< for objects that have the field 'fields'...
 // if we don't have a 'to_ostream' but we do have 'fields' then use that
 template<typename T>
-requires (!Common::has_to_ostream_v<T> && Common::has_fields_v<T>)
+requires (
+	!Common::has_to_ostream_v<T>
+	&& Common::has_fields_v<T>
+	&& !Common::has_dontUseFieldsOStream_v<T> 
+)
 std::ostream& operator<<(std::ostream& o, T const & b) {
 	o << "{";
 	Common::TupleForEach(T::fields, [&o, &b](auto const & x, size_t i) constexpr -> bool {
