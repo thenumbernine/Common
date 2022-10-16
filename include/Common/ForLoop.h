@@ -6,7 +6,8 @@
 namespace Common {
 
 //for loop - compile-time indexes and execution of runtime code
-
+// accepts varargs.
+// return true to short-circuit.
 template<int index, int end, template<int> class Exec, int step = (end > index ? 1 : -1)>
 struct ForLoop {
 	template<typename... InputArgs>
@@ -15,7 +16,6 @@ struct ForLoop {
 		return ForLoop<index+step,end,Exec,step>::exec(std::forward<InputArgs>(input)...);
 	}
 };
-
 template<int end, template<int> class Exec, int step>
 struct ForLoop<end, end, Exec, step> {
 	template<typename... InputArgs>
