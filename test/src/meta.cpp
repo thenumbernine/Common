@@ -90,7 +90,20 @@ namespace Test {
 		std::index_sequence<9,4,5>,
 		seq_reverse_t<std::index_sequence<5,4,9>>
 	>);
+
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 0>,std::tuple<>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 1>,std::tuple<int>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 2>,std::tuple<int, char*>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 3>,std::tuple<int, char*, double>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 1, 1>,std::tuple<>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 1, 2>,std::tuple<char*>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 1, 3>,std::tuple<char*, double>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 2, 2>,std::tuple<>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 2, 3>,std::tuple<double>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 3, 3>,std::tuple<>>);
 }
+
+
 
 //for-loop
 
