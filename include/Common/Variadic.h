@@ -3,6 +3,8 @@
 // ok putting all metaprograms in "meta" is no longer viable
 // here's the metaprograms associated with variadic arg manipulation
 
+#include <cstddef>	//size_t
+
 namespace Common {
 
 /*
