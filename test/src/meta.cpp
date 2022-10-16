@@ -101,6 +101,111 @@ namespace Test {
 	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 2, 2>,std::tuple<>>);
 	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 2, 3>,std::tuple<double>>);
 	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 3, 3>,std::tuple<>>);
+
+	static_assert(std::is_same_v<
+		tuple_cat_t<
+			std::tuple<>,
+			std::tuple<>
+		>,
+		std::tuple<>
+	>);
+	static_assert(std::is_same_v<
+		tuple_cat_t<
+			std::tuple<double>,
+			std::tuple<>
+		>,
+		std::tuple<double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_cat_t<
+			std::tuple<>,
+			std::tuple<double>
+		>,
+		std::tuple<double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_cat_t<
+			std::tuple<double>,
+			std::tuple<>,
+			std::tuple<>
+		>,
+		std::tuple<double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_cat_t<
+			std::tuple<>,
+			std::tuple<double>,
+			std::tuple<>
+		>,
+		std::tuple<double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_cat_t<
+			std::tuple<>,
+			std::tuple<>,
+			std::tuple<double>
+		>,
+		std::tuple<double>
+	>);
+
+	static_assert(std::is_same_v<
+		make_index_range<0, 4>,
+		std::index_sequence<0, 1, 2, 3>
+	>);
+	static_assert(std::is_same_v<
+		make_index_range<4, 0>,
+		std::index_sequence<4, 3, 2, 1>
+	>);
+	static_assert(std::is_same_v<
+		make_index_range<4, 4>,
+		std::index_sequence<>
+	>);
+	static_assert(std::is_same_v<
+		make_index_range<0, 0>,
+		std::index_sequence<>
+	>);
+
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<>, 0, 0>,std::tuple<>>);
+	static_assert(std::is_same_v<tuple_subset_t<std::tuple<>, 0, 0>,std::tuple<>>);
+
+	static_assert(std::is_same_v<
+		tuple_insert_t<std::tuple<>, 0, std::tuple<>>,
+		std::tuple<>
+	>);
+
+	static_assert(std::is_same_v<
+		tuple_insert_t<
+			std::tuple<int, char*, double>,
+			0,
+			std::tuple<short, long>
+		>,
+		std::tuple<short, long, int, char*, double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_insert_t<
+			std::tuple<int, char*, double>,
+			1,
+			std::tuple<short, long>
+		>,
+		std::tuple<int, short, long, char*, double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_insert_t<
+			std::tuple<int, char*, double>,
+			2,
+			std::tuple<short, long>
+		>,
+		std::tuple<int, char*, short, long, double>
+	>);
+	static_assert(std::is_same_v<
+		tuple_insert_t<
+			std::tuple<int, char*, double>,
+			3,
+			std::tuple<short, long>
+		>,
+		std::tuple<int, char*, double, short, long>
+	>);
+
 }
 
 

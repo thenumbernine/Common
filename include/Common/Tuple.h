@@ -87,7 +87,7 @@ template<typename I, typename Tuple, template<typename> typename F>
 struct TupleToSeqMapImpl;
 template<typename I, typename T, typename... Ts, template<typename> typename F>
 struct TupleToSeqMapImpl<I, std::tuple<T, Ts...>, F> {
-	using type = Common::seq_cat_t<
+	using type = seq_cat_t<
 		std::integer_sequence<I, F<T>::value>,
 		typename TupleToSeqMapImpl<I, std::tuple<Ts...>, F>::type
 	>;
@@ -104,7 +104,7 @@ template<typename I, typename Seq, template<I> typename F>
 struct SeqToTupleMapImpl;
 template<typename I, I i1, I... is, template<I> typename F>
 struct SeqToTupleMapImpl<I, std::integer_sequence<I, i1, is...>, F> {
-	using type = Common::seq_cat_t<
+	using type = seq_cat_t<
 		std::tuple<F<i1>>,
 		typename SeqToTupleMapImpl<I, std::integer_sequence<I, is...>, F>::type
 	>;
@@ -131,8 +131,21 @@ template<typename Tuple, typename Seq>
 using TupleGetSeq = typename TupleGetSeqImpl<Tuple, Seq>::type; 
 
 template<typename Tuple, size_t from, size_t to>
-using tuple_subset_t = TupleGetSeq<Tuple, Common::make_index_range<from, to>>;
+using tuple_subset_t = TupleGetSeq<
+	Tuple,
+	make_index_range<
+		from,
+		std::min(std::tuple_size_v<Tuple>, std::max(from,to))
+	>
+>;
 
+//insert Ins into Src at 'index'
+template<typename Src, int index, typename Ins>
+using tuple_insert_t = tuple_cat_t<
+	tuple_subset_t<Src, 0, index>,
+	Ins,
+	tuple_subset_t<Src, index, std::tuple_size_v<Src>>
+>;
 
 // apply tuple arguments to a templated type
 template<template<typename...> typename F, typename TupleOfArgs>
