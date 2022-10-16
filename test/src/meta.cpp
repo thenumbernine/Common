@@ -15,6 +15,13 @@ namespace Test {
 	static_assert(variadic_get_v<0,size_t,1> == 1);
 	static_assert(variadic_get_v<0,size_t,1,2> == 1);
 	static_assert(variadic_get_v<1,size_t,1,2> == 2);
+	
+	static_assert(variadic_get_v<0,int,1> == 1);
+	static_assert(variadic_get_v<0,int,1,2> == 1);
+	static_assert(variadic_get_v<1,int,1,2> == 2);
+
+	STATIC_ASSERT_EQ((seq_get_v<0, std::integer_sequence<size_t,7>>), 7);
+	STATIC_ASSERT_EQ((seq_get_v<0, std::integer_sequence<int,7>>), 7);
 
 	static_assert(
 		std::is_same_v<

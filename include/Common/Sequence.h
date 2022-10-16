@@ -42,7 +42,7 @@ template<size_t i, typename T, typename R = typename T::value_type>
 constexpr R seq_get_v = {};
 
 template<size_t i, typename T, T... I>
-constexpr T seq_get_v<i, std::index_sequence<I...>> = variadic_get_v<i, T, I...>;
+constexpr T seq_get_v<i, std::integer_sequence<T, I...>> = variadic_get_v<i, T, I...>;
 
 // concat index_sequence
 //https://devblogs.microsoft.com/oldnewthing/20200625-00/?p=103903

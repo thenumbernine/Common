@@ -43,3 +43,18 @@
 #define TEST_GT(a,b) TEST_OP(a,b,>)
 #define TEST_GE(a,b) TEST_OP(a,b,>=)
 #define TEST_EQ_EPS(a,b,epsilon) TEST_LE(fabs(a-b), epsilon)
+
+// static-asserts
+
+namespace Common {
+
+template<int A, int B>
+struct StaticAssertEq {
+	static_assert(A == B);
+	static constexpr bool value = true;
+};
+
+}
+
+#define STATIC_ASSERT_EQ(A,B)\
+	static_assert((Common::StaticAssertEq<A,B>::value));
