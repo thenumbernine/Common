@@ -30,14 +30,6 @@ using is_instance = is_instance_impl<std::decay_t<T>, U>;
 template <typename T, template <typename ...> typename U>
 constexpr bool is_instance_v = is_instance<T, U>::value;
 
-// I was using optional<> to capture types without instanciating them
-// but optional can't wrap references, so ...
-// TODO might move this somewhere like Common/Meta.h
-template<typename T>
-struct TypeWrapper {
-	using type = T;
-};
-
 //https://codereview.stackexchange.com/a/208195
 template<typename U>
 struct constness_of { 
