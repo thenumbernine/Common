@@ -91,6 +91,24 @@ template<template<typename...> typename F, typename TupleOfArgs>
 using tuple_apply_t = typename tuple_apply_impl<F, TupleOfArgs>::type;
 
 
+template<typename What, typename WhereTuple>
+struct tuple_find;
+template<typename What, typename Where1, typename... Wheres>
+struct tuple_find<What, std::tuple<Where1, Wheres...>> {
+	static constexpr auto nextvalue = tuple_find<What, std::tuple<Wheres...>>::value;
+	static constexpr auto value = 
+		std::is_same_v<What, Where1>
+		? 0
+		: (nextvalue == -1 ? -1 : nextvalue + 1);
+};
+template<typename What>
+struct tuple_find<What, std::tuple<>> {
+	static constexpr auto value = -1;
+};
+template<typename What, typename WhereTuple>
+static constexpr int tuple_find_v = tuple_find<What, WhereTuple>::value;
+
+
 
 //https://stackoverflow.com/a/38894158
 // but i switched template args T and I so they match array and my own vec
@@ -106,6 +124,7 @@ struct tuple_rep_impl<T, 0> {
 };
 template <typename T, size_t I>
 using tuple_rep_t = typename tuple_rep_impl<T,I>::template type<>;
+
 
 // https://stackoverflow.com/a/6894436/2714073
 // return 'true' to stop early
@@ -173,28 +192,28 @@ template<typename I, typename T, template<typename> typename F>
 using TupleToSeqMap = typename TupleToSeqMapImpl<I, T, F>::type;
 
 
-template<typename I, typename Seq, template<I> typename F>
+template<typename Seq, template<typename Seq::value_type> typename F>
 struct SeqToTupleMapImpl;
 template<typename I, I i1, I... is, template<I> typename F>
-struct SeqToTupleMapImpl<I, std::integer_sequence<I, i1, is...>, F> {
+struct SeqToTupleMapImpl<std::integer_sequence<I, i1, is...>, F> {
 	using type = tuple_cat_t<
 		std::tuple<F<i1>>,
-		typename SeqToTupleMapImpl<I, std::integer_sequence<I, is...>, F>::type
+		typename SeqToTupleMapImpl<std::integer_sequence<I, is...>, F>::type
 	>;
 };
 template<typename I, template<I> typename F>
-struct SeqToTupleMapImpl<I, std::integer_sequence<I>, F> {
+struct SeqToTupleMapImpl<std::integer_sequence<I>, F> {
 	using type = std::tuple<>;
 };
-template<typename Seq, typename I, template<I> typename F>
-using SeqToTupleMap = typename SeqToTupleMapImpl<I, Seq, F>::type;
+template<typename Seq, template<typename Seq::value_type> typename F>
+using SeqToTupleMap = typename SeqToTupleMapImpl<Seq, F>::type;
 
 // assumes F<I>::value produces Seq::value_type
 template<typename Seq, template<typename Seq::value_type> typename F>
 struct SeqToSeqMapImpl;
 template<typename I, I i1, I... is, template<I> typename F>
 struct SeqToSeqMapImpl<std::integer_sequence<I, i1, is...>, F> {
-	using type = Common::seq_cat_t<
+	using type = seq_cat_t<
 		std::integer_sequence<I, F<i1>::value>,
 		typename SeqToSeqMapImpl<std::integer_sequence<I, is...>, F>::type
 	>;
