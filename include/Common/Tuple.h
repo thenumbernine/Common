@@ -51,73 +51,6 @@ template<typename T>
 using tuple_remove_last_t = tuple_remove_t<std::tuple_size_v<T>-1, T>;
 
 
-template<typename T, template<typename> typename F>
-struct TupleTypeMapImpl;
-template<typename T, typename... Ts, template<typename> typename F>
-struct TupleTypeMapImpl<std::tuple<T, Ts...>, F> {
-	using type = tuple_cat_t<
-		std::tuple<F<T>>,
-		typename TupleTypeMapImpl<std::tuple<Ts...>, F>::type
-	>;
-};
-template<template<typename> typename F>
-struct TupleTypeMapImpl<std::tuple<>, F> {
-	using type = std::tuple<>;
-};
-template<typename T, template<typename> typename F>
-using TupleTypeMap = typename TupleTypeMapImpl<T, F>::type;
-
-//apply successive types
-template<typename T, template<typename> typename... Fs>
-struct TupleTypeMapsImpl;
-template<typename T, template<typename> typename F, template<typename> typename... Fs>
-struct TupleTypeMapsImpl<T, F, Fs...> {
-	using type = typename TupleTypeMapsImpl<TupleTypeMap<T, F>, Fs...>::type;
-};
-template<typename T>
-struct TupleTypeMapsImpl<T> {
-	using type = T;
-};
-template<typename T, template<typename> typename... Fs>
-using TupleTypeMaps = typename TupleTypeMapsImpl<T, Fs...>::type;
-
-// tuple to sequence map
-// can't seem to pass "template<typename> int F", so F must be a class with a ::value whose type matches integer_sequence type I
-template<typename I, typename Tuple, template<typename> typename F>
-struct TupleToSeqMapImpl;
-template<typename I, typename T, typename... Ts, template<typename> typename F>
-struct TupleToSeqMapImpl<I, std::tuple<T, Ts...>, F> {
-	using type = seq_cat_t<
-		std::integer_sequence<I, F<T>::value>,
-		typename TupleToSeqMapImpl<I, std::tuple<Ts...>, F>::type
-	>;
-};
-template<typename I, template<typename> typename F>
-struct TupleToSeqMapImpl<I, std::tuple<>, F> {
-	using type = std::integer_sequence<I>;
-};
-template<typename I, typename T, template<typename> typename F>
-using TupleToSeqMap = typename TupleToSeqMapImpl<I, T, F>::type;
-
-
-template<typename I, typename Seq, template<I> typename F>
-struct SeqToTupleMapImpl;
-template<typename I, I i1, I... is, template<I> typename F>
-struct SeqToTupleMapImpl<I, std::integer_sequence<I, i1, is...>, F> {
-	using type = seq_cat_t<
-		std::tuple<F<i1>>,
-		typename SeqToTupleMapImpl<I, std::integer_sequence<I, is...>, F>::type
-	>;
-};
-template<typename I, template<I> typename F>
-struct SeqToTupleMapImpl<I, std::integer_sequence<I>, F> {
-	using type = std::tuple<>;
-};
-template<typename Seq, typename I, template<I> typename F>
-using SeqToTupleMap = typename SeqToTupleMapImpl<I, Seq, F>::type;
-
-
-
 template<typename Tuple, typename I, I... is>
 using TupleGetVariadic = std::tuple< std::tuple_element_t<is, Tuple> ... >;
 
@@ -186,5 +119,92 @@ bool TupleForEach(std::tuple<Tp...> const & t, FuncT f) {
 	if (f(std::get<I>(t), I)) return true;
 	return TupleForEach<I + 1, FuncT, Tp...>(t, f);
 }
+
+
+// Tuple/Tuple, Tuple/Seq, Seq/Tuple, Seq/Seq mapping via template arg
+// put these in their own header?
+
+template<typename T, template<typename> typename F>
+struct TupleTypeMapImpl;
+template<typename T, typename... Ts, template<typename> typename F>
+struct TupleTypeMapImpl<std::tuple<T, Ts...>, F> {
+	using type = tuple_cat_t<
+		std::tuple<F<T>>,
+		typename TupleTypeMapImpl<std::tuple<Ts...>, F>::type
+	>;
+};
+template<template<typename> typename F>
+struct TupleTypeMapImpl<std::tuple<>, F> {
+	using type = std::tuple<>;
+};
+template<typename T, template<typename> typename F>
+using TupleTypeMap = typename TupleTypeMapImpl<T, F>::type;
+
+//apply successive types
+template<typename T, template<typename> typename... Fs>
+struct TupleTypeMapsImpl;
+template<typename T, template<typename> typename F, template<typename> typename... Fs>
+struct TupleTypeMapsImpl<T, F, Fs...> {
+	using type = typename TupleTypeMapsImpl<TupleTypeMap<T, F>, Fs...>::type;
+};
+template<typename T>
+struct TupleTypeMapsImpl<T> {
+	using type = T;
+};
+template<typename T, template<typename> typename... Fs>
+using TupleTypeMaps = typename TupleTypeMapsImpl<T, Fs...>::type;
+
+// tuple to sequence map
+// can't seem to pass "template<typename> int F", so F must be a class with a ::value whose type matches integer_sequence type I
+template<typename I, typename Tuple, template<typename> typename F>
+struct TupleToSeqMapImpl;
+template<typename I, typename T, typename... Ts, template<typename> typename F>
+struct TupleToSeqMapImpl<I, std::tuple<T, Ts...>, F> {
+	using type = seq_cat_t<
+		std::integer_sequence<I, F<T>::value>,
+		typename TupleToSeqMapImpl<I, std::tuple<Ts...>, F>::type
+	>;
+};
+template<typename I, template<typename> typename F>
+struct TupleToSeqMapImpl<I, std::tuple<>, F> {
+	using type = std::integer_sequence<I>;
+};
+template<typename I, typename T, template<typename> typename F>
+using TupleToSeqMap = typename TupleToSeqMapImpl<I, T, F>::type;
+
+
+template<typename I, typename Seq, template<I> typename F>
+struct SeqToTupleMapImpl;
+template<typename I, I i1, I... is, template<I> typename F>
+struct SeqToTupleMapImpl<I, std::integer_sequence<I, i1, is...>, F> {
+	using type = tuple_cat_t<
+		std::tuple<F<i1>>,
+		typename SeqToTupleMapImpl<I, std::integer_sequence<I, is...>, F>::type
+	>;
+};
+template<typename I, template<I> typename F>
+struct SeqToTupleMapImpl<I, std::integer_sequence<I>, F> {
+	using type = std::tuple<>;
+};
+template<typename Seq, typename I, template<I> typename F>
+using SeqToTupleMap = typename SeqToTupleMapImpl<I, Seq, F>::type;
+
+// assumes F<I>::value produces Seq::value_type
+template<typename Seq, template<typename Seq::value_type> typename F>
+struct SeqToSeqMapImpl;
+template<typename I, I i1, I... is, template<I> typename F>
+struct SeqToSeqMapImpl<std::integer_sequence<I, i1, is...>, F> {
+	using type = Common::seq_cat_t<
+		std::integer_sequence<I, F<i1>::value>,
+		typename SeqToSeqMapImpl<std::integer_sequence<I, is...>, F>::type
+	>;
+};
+template<typename I, template<I> typename F>
+struct SeqToSeqMapImpl<std::integer_sequence<I>, F> {
+	using type = std::integer_sequence<I>;
+};
+template<typename Seq, template<typename Seq::value_type> typename F>
+using SeqToSeqMap = typename SeqToSeqMapImpl<Seq, F>::type;
+
 
 }
