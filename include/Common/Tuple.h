@@ -226,4 +226,56 @@ template<typename Seq, template<typename Seq::value_type> typename F>
 using SeqToSeqMap = typename SeqToSeqMapImpl<Seq, F>::type;
 
 
+// F<T>::value is a bool for yes or no to add to 'has' or 'hasnot'
+template<typename Tuple, typename indexSeq, template<typename> typename F>
+struct tuple_get_filtered_indexes;
+template<
+	typename T, typename... Ts,
+	int i1, int... is,
+	template<typename> typename F
+>
+struct tuple_get_filtered_indexes<
+	std::tuple<T, Ts...>, 
+	std::integer_sequence<int, i1, is...>,
+	F
+> {
+	using next = tuple_get_filtered_indexes<
+		std::tuple<Ts...>, 
+		std::integer_sequence<int, is...>,
+		F
+	>;
+	static constexpr auto value() {
+		if constexpr (F<T>::value) {
+			using has = seq_cat_t<
+				std::integer_sequence<int, i1>,
+				typename next::has
+			>;
+			using hasnot = typename next::hasnot;
+			return (std::pair<has, hasnot>*)nullptr;
+		} else {
+			using has = typename next::has;
+			using hasnot = seq_cat_t<
+				std::integer_sequence<int, i1>,
+				typename next::hasnot
+			>;
+			return (std::pair<has, hasnot>*)nullptr;
+		}
+	}
+	using result = typename std::remove_pointer_t<decltype(value())>;
+	using has = typename result::first_type;
+	using hasnot = typename result::second_type;
+};
+template<template<typename> typename F>
+struct tuple_get_filtered_indexes<std::tuple<>, std::integer_sequence<int>, F> {
+	using has = std::integer_sequence<int>;
+	using hasnot = std::integer_sequence<int>;
+};
+template<typename Tuple, template<typename> typename F>
+using tuple_get_filtered_indexes_t = tuple_get_filtered_indexes<
+	Tuple,
+	std::make_integer_sequence<int, std::tuple_size_v<Tuple>>,
+	F
+>;
+
+
 }

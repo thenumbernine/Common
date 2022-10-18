@@ -11,6 +11,22 @@
 
 namespace Test {
 	using namespace Common;
+	using namespace std;
+
+	STATIC_ASSERT_EQ((tuple_find_v<char, tuple<>>), -1);
+	STATIC_ASSERT_EQ((tuple_find_v<char, tuple<char>>), 0);
+	STATIC_ASSERT_EQ((tuple_find_v<char, tuple<float>>), -1);
+	STATIC_ASSERT_EQ((tuple_find_v<char, tuple<char, float>>), 0);
+	STATIC_ASSERT_EQ((tuple_find_v<char, tuple<float, char>>), 1);
+
+	using yesno = tuple_get_filtered_indexes_t<
+		tuple<float, int, double, char>,
+		is_integral
+	>;
+	static_assert(is_same_v<typename yesno::has, integer_sequence<int, 1, 3>>);
+	static_assert(is_same_v<typename yesno::hasnot, integer_sequence<int, 0, 2>>);
+
+
 
 	static_assert(variadic_get_v<0,size_t,1> == 1);
 	static_assert(variadic_get_v<0,size_t,1,2> == 1);
@@ -20,26 +36,26 @@ namespace Test {
 	static_assert(variadic_get_v<0,int,1,2> == 1);
 	static_assert(variadic_get_v<1,int,1,2> == 2);
 
-	STATIC_ASSERT_EQ((seq_get_v<0, std::integer_sequence<size_t,7>>), 7);
-	STATIC_ASSERT_EQ((seq_get_v<0, std::integer_sequence<int,7>>), 7);
+	STATIC_ASSERT_EQ((seq_get_v<0, integer_sequence<size_t,7>>), 7);
+	STATIC_ASSERT_EQ((seq_get_v<0, integer_sequence<int,7>>), 7);
 
 	static_assert(
-		std::is_same_v<
+		is_same_v<
 			seq_cat_t<
-				std::integer_sequence<int, 1>,
-				std::integer_sequence<int, 2,3>
-				//std::integer_sequence<size_t, 2,3>	//types have to match or you get a compilererror
+				integer_sequence<int, 1>,
+				integer_sequence<int, 2,3>
+				//integer_sequence<size_t, 2,3>	//types have to match or you get a compilererror
 			>,
-			std::integer_sequence<int, 1,2,3>
+			integer_sequence<int, 1,2,3>
 		>
 	);
 
-	static_assert(std::is_same_v<seq_set_t<std::index_sequence<2>, 0, 3>, std::index_sequence<3>>);
-	static_assert(std::is_same_v<seq_set_t<std::index_sequence<1, 2>, 0, 3>, std::index_sequence<3, 2>>);
-	static_assert(std::is_same_v<seq_set_t<std::index_sequence<1, 2>, 1, 3>, std::index_sequence<1, 3>>);
-	static_assert(std::is_same_v<seq_set_t<std::index_sequence<7, 5, 9>, 0, 3>, std::index_sequence<3, 5, 9>>);
-	static_assert(std::is_same_v<seq_set_t<std::index_sequence<7, 5, 9>, 1, 3>, std::index_sequence<7, 3, 9>>);
-	static_assert(std::is_same_v<seq_set_t<std::index_sequence<7, 5, 9>, 2, 3>, std::index_sequence<7, 5, 3>>);
+	static_assert(is_same_v<seq_set_t<index_sequence<2>, 0, 3>, index_sequence<3>>);
+	static_assert(is_same_v<seq_set_t<index_sequence<1, 2>, 0, 3>, index_sequence<3, 2>>);
+	static_assert(is_same_v<seq_set_t<index_sequence<1, 2>, 1, 3>, index_sequence<1, 3>>);
+	static_assert(is_same_v<seq_set_t<index_sequence<7, 5, 9>, 0, 3>, index_sequence<3, 5, 9>>);
+	static_assert(is_same_v<seq_set_t<index_sequence<7, 5, 9>, 1, 3>, index_sequence<7, 3, 9>>);
+	static_assert(is_same_v<seq_set_t<index_sequence<7, 5, 9>, 2, 3>, index_sequence<7, 5, 3>>);
 
 	static_assert(constexpr_min(1,2) == 1);
 	static_assert(constexpr_min(4,3) == 3);
@@ -51,12 +67,12 @@ namespace Test {
 	static_assert(variadic_min_v<short,5,3,8> == 3);
 	static_assert(variadic_min_v<short,9,5,1> == 1);
 
-	static_assert(seq_min_v<std::index_sequence<7>> == 7);
-	static_assert(seq_min_v<std::index_sequence<3,8>> == 3);
-	static_assert(seq_min_v<std::integer_sequence<int,9,1>> == 1);
-	static_assert(seq_min_v<std::integer_sequence<int,2,4,8>> == 2);
-	static_assert(seq_min_v<std::integer_sequence<short,5,3,8>> == 3);
-	static_assert(seq_min_v<std::integer_sequence<short,9,5,1>> == 1);
+	static_assert(seq_min_v<index_sequence<7>> == 7);
+	static_assert(seq_min_v<index_sequence<3,8>> == 3);
+	static_assert(seq_min_v<integer_sequence<int,9,1>> == 1);
+	static_assert(seq_min_v<integer_sequence<int,2,4,8>> == 2);
+	static_assert(seq_min_v<integer_sequence<short,5,3,8>> == 3);
+	static_assert(seq_min_v<integer_sequence<short,9,5,1>> == 1);
 
 	//static_assert(variadic_min_loc_v<size_t,> == 0); // should error
 	static_assert(variadic_min_loc_v<size_t,7> == 0);
@@ -66,144 +82,144 @@ namespace Test {
 	static_assert(variadic_min_loc_v<size_t,5,3,8> == 1);
 	static_assert(variadic_min_loc_v<size_t,9,5,1> == 2);
 
-	static_assert(seq_min_loc_v<std::index_sequence<3>> == 0);
-	static_assert(seq_get_v<seq_min_loc_v<std::index_sequence<3>>, std::index_sequence<3>> == 3);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<1>>, std::index_sequence<1>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<3,4>>, std::index_sequence<3,4>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<4,3>>, std::index_sequence<3,4>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<2,5,8>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<2,8,5>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<5,2,8>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<5,8,2>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<8,2,5>>, std::index_sequence<2,5,8>>);
-	static_assert(std::is_same_v<seq_sort_t<std::index_sequence<8,5,2>>, std::index_sequence<2,5,8>>);
+	static_assert(seq_min_loc_v<index_sequence<3>> == 0);
+	static_assert(seq_get_v<seq_min_loc_v<index_sequence<3>>, index_sequence<3>> == 3);
+	static_assert(is_same_v<seq_sort_t<index_sequence<1>>, index_sequence<1>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<3,4>>, index_sequence<3,4>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<4,3>>, index_sequence<3,4>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<2,5,8>>, index_sequence<2,5,8>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<2,8,5>>, index_sequence<2,5,8>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<5,2,8>>, index_sequence<2,5,8>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<5,8,2>>, index_sequence<2,5,8>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<8,2,5>>, index_sequence<2,5,8>>);
+	static_assert(is_same_v<seq_sort_t<index_sequence<8,5,2>>, index_sequence<2,5,8>>);
 
-	static_assert(std::is_same_v<
-		std::index_sequence<2>,
-		seq_reverse_t<std::index_sequence<2>>
+	static_assert(is_same_v<
+		index_sequence<2>,
+		seq_reverse_t<index_sequence<2>>
 	>);
-	static_assert(std::is_same_v<
-		std::index_sequence<2,4>,
-		seq_reverse_t<std::index_sequence<4,2>>
+	static_assert(is_same_v<
+		index_sequence<2,4>,
+		seq_reverse_t<index_sequence<4,2>>
 	>);
-	static_assert(std::is_same_v<
-		std::index_sequence<9,4,5>,
-		seq_reverse_t<std::index_sequence<5,4,9>>
-	>);
-
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 0>,std::tuple<>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 1>,std::tuple<int>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 2>,std::tuple<int, char*>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 0, 3>,std::tuple<int, char*, double>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 1, 1>,std::tuple<>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 1, 2>,std::tuple<char*>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 1, 3>,std::tuple<char*, double>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 2, 2>,std::tuple<>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 2, 3>,std::tuple<double>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<int, char*, double>, 3, 3>,std::tuple<>>);
-
-	static_assert(std::is_same_v<
-		tuple_cat_t<
-			std::tuple<>,
-			std::tuple<>
-		>,
-		std::tuple<>
-	>);
-	static_assert(std::is_same_v<
-		tuple_cat_t<
-			std::tuple<double>,
-			std::tuple<>
-		>,
-		std::tuple<double>
-	>);
-	static_assert(std::is_same_v<
-		tuple_cat_t<
-			std::tuple<>,
-			std::tuple<double>
-		>,
-		std::tuple<double>
-	>);
-	static_assert(std::is_same_v<
-		tuple_cat_t<
-			std::tuple<double>,
-			std::tuple<>,
-			std::tuple<>
-		>,
-		std::tuple<double>
-	>);
-	static_assert(std::is_same_v<
-		tuple_cat_t<
-			std::tuple<>,
-			std::tuple<double>,
-			std::tuple<>
-		>,
-		std::tuple<double>
-	>);
-	static_assert(std::is_same_v<
-		tuple_cat_t<
-			std::tuple<>,
-			std::tuple<>,
-			std::tuple<double>
-		>,
-		std::tuple<double>
+	static_assert(is_same_v<
+		index_sequence<9,4,5>,
+		seq_reverse_t<index_sequence<5,4,9>>
 	>);
 
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 0, 0>,tuple<>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 0, 1>,tuple<int>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 0, 2>,tuple<int, char*>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 0, 3>,tuple<int, char*, double>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 1, 1>,tuple<>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 1, 2>,tuple<char*>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 1, 3>,tuple<char*, double>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 2, 2>,tuple<>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 2, 3>,tuple<double>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<int, char*, double>, 3, 3>,tuple<>>);
+
+	static_assert(is_same_v<
+		tuple_cat_t<
+			tuple<>,
+			tuple<>
+		>,
+		tuple<>
+	>);
+	static_assert(is_same_v<
+		tuple_cat_t<
+			tuple<double>,
+			tuple<>
+		>,
+		tuple<double>
+	>);
+	static_assert(is_same_v<
+		tuple_cat_t<
+			tuple<>,
+			tuple<double>
+		>,
+		tuple<double>
+	>);
+	static_assert(is_same_v<
+		tuple_cat_t<
+			tuple<double>,
+			tuple<>,
+			tuple<>
+		>,
+		tuple<double>
+	>);
+	static_assert(is_same_v<
+		tuple_cat_t<
+			tuple<>,
+			tuple<double>,
+			tuple<>
+		>,
+		tuple<double>
+	>);
+	static_assert(is_same_v<
+		tuple_cat_t<
+			tuple<>,
+			tuple<>,
+			tuple<double>
+		>,
+		tuple<double>
+	>);
+
+	static_assert(is_same_v<
 		make_index_range<0, 4>,
-		std::index_sequence<0, 1, 2, 3>
+		index_sequence<0, 1, 2, 3>
 	>);
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		make_index_range<4, 0>,
-		std::index_sequence<4, 3, 2, 1>
+		index_sequence<4, 3, 2, 1>
 	>);
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		make_index_range<4, 4>,
-		std::index_sequence<>
+		index_sequence<>
 	>);
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		make_index_range<0, 0>,
-		std::index_sequence<>
+		index_sequence<>
 	>);
 
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<>, 0, 0>,std::tuple<>>);
-	static_assert(std::is_same_v<tuple_subset_t<std::tuple<>, 0, 0>,std::tuple<>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<>, 0, 0>,tuple<>>);
+	static_assert(is_same_v<tuple_subset_t<tuple<>, 0, 0>,tuple<>>);
 
-	static_assert(std::is_same_v<
-		tuple_insert_t<std::tuple<>, 0, std::tuple<>>,
-		std::tuple<>
+	static_assert(is_same_v<
+		tuple_insert_t<tuple<>, 0, tuple<>>,
+		tuple<>
 	>);
 
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		tuple_insert_t<
-			std::tuple<int, char*, double>,
+			tuple<int, char*, double>,
 			0,
-			std::tuple<short, long>
+			tuple<short, long>
 		>,
-		std::tuple<short, long, int, char*, double>
+		tuple<short, long, int, char*, double>
 	>);
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		tuple_insert_t<
-			std::tuple<int, char*, double>,
+			tuple<int, char*, double>,
 			1,
-			std::tuple<short, long>
+			tuple<short, long>
 		>,
-		std::tuple<int, short, long, char*, double>
+		tuple<int, short, long, char*, double>
 	>);
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		tuple_insert_t<
-			std::tuple<int, char*, double>,
+			tuple<int, char*, double>,
 			2,
-			std::tuple<short, long>
+			tuple<short, long>
 		>,
-		std::tuple<int, char*, short, long, double>
+		tuple<int, char*, short, long, double>
 	>);
-	static_assert(std::is_same_v<
+	static_assert(is_same_v<
 		tuple_insert_t<
-			std::tuple<int, char*, double>,
+			tuple<int, char*, double>,
 			3,
-			std::tuple<short, long>
+			tuple<short, long>
 		>,
-		std::tuple<int, char*, double, short, long>
+		tuple<int, char*, double, short, long>
 	>);
 
 }
