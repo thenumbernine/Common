@@ -1,3 +1,8 @@
 distName='test'
 distType='app'
 depends = {'..'}
+
+--[[
+compiler = 'clang++'
+linker = 'clang++'
+--]]

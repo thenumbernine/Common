@@ -1,2 +1,7 @@
 distName='Common'
 distType='lib'
+
+--[[
+compiler = 'clang++'
+linker = 'clang++'
+--]]

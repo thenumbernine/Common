@@ -297,6 +297,7 @@ void testForLoop() {
 	});
 	
 	using S = std::index_sequence<1,2,3>;
+	// error under clang: "constexpr function never produces a constant expression"
 	Common::for_seq_runtime<S>([](size_t i) constexpr -> bool {
 		std::cout << "for_seq_runtime " << i << "'th" << std::endl;
 		return false;
