@@ -241,4 +241,19 @@ template<typename T>
 using seq_reverse_t = typename seq_reverse_impl<T>::type;
 
 
+// TODO for all operations 
+//https://stackoverflow.com/a/55247213
+template<typename T, T... Args>
+constexpr T seq_plus(std::integer_sequence<T, Args...> = {}) {
+	return (Args + ... + (0));
+}
+template<typename T, T... Args>
+constexpr T seq_multiplies(std::integer_sequence<T, Args...> = {}) {
+	return (Args * ... * (1));
+}
+template<typename T, T... Args>
+constexpr T seq_logical_and(std::integer_sequence<T, Args...> = {}) {
+	return (Args && ... && (true));
+}
+
 }
