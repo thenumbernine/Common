@@ -47,19 +47,38 @@ constexpr T seq_get_v<i, std::integer_sequence<T, I...>> = variadic_get_v<i, T, 
 // concat index_sequence
 //https://devblogs.microsoft.com/oldnewthing/20200625-00/?p=103903
 
-template<typename Seq1, typename Seq>
+// because there's a case that Seqs... is zero-sized, you do have to provide a default type.
+template<typename Int, typename... Seqs>
 struct seq_cat;
-
-template<typename T, T... Ints1, T... Ints2>
-struct seq_cat<
-	std::integer_sequence<T, Ints1...>,
-	std::integer_sequence<T, Ints2...>
-> {
-	using type = std::integer_sequence<T, Ints1..., Ints2...>;
+template<typename Int>
+struct seq_cat<Int> {
+	using type = std::integer_sequence<Int>;
 };
-
-template<typename Seq1, typename Seq2>
-using seq_cat_t = typename seq_cat<Seq1, Seq2>::type;
+template<typename Int, Int... Ints1>
+struct seq_cat<
+	Int,
+	std::integer_sequence<Int, Ints1...>
+> {
+	using type = std::integer_sequence<Int, Ints1...>;
+};
+template<typename Int, Int... Ints1, Int... Ints2>
+struct seq_cat<
+	Int,
+	std::integer_sequence<Int, Ints1...>,
+	std::integer_sequence<Int, Ints2...>
+> {
+	using type = std::integer_sequence<Int, Ints1..., Ints2...>;
+};
+template<typename Int, typename Seq1, typename Seq2, typename... Seqs>
+struct seq_cat<Int, Seq1, Seq2, Seqs...> {
+	using type = typename seq_cat<
+		Int,
+		typename seq_cat<Int, Seq1, Seq2>::type,
+		typename seq_cat<Int, Seqs...>::type
+	>::type;
+};
+template<typename Int, typename... Seqs>
+using seq_cat_t = typename seq_cat<Int, Seqs...>::type;
 
 // set the i'th value of an index_sequence
 
@@ -69,6 +88,7 @@ struct seq_set;
 template<typename R, R value, size_t i, R first, R... rest>
 struct seq_set<R, value, i, std::integer_sequence<R, first, rest...>> {
 	using type = seq_cat_t<
+		R,
 		std::integer_sequence<R, first>,
 		typename seq_set<R, value, i-1, std::integer_sequence<R, rest...>>::type
 	>;
@@ -77,6 +97,7 @@ struct seq_set<R, value, i, std::integer_sequence<R, first, rest...>> {
 template<typename R, R value, R first, R... rest>
 struct seq_set<R, value, 0, std::integer_sequence<R, first, rest...>> {
 	using type = seq_cat_t<
+		R,
 		std::integer_sequence<R, value>,
 		std::integer_sequence<R, rest...>
 	>;
@@ -144,11 +165,12 @@ struct seq_sort<std::integer_sequence<R, i1, I...>> {
 			// sort the rest
 			using rest_set_i_sorted = decltype(seq_sort<rest_set_i>::value());
 			// then prepend the first element
-			using sorted = seq_cat_t<std::integer_sequence<R, ij>, rest_set_i_sorted>;
+			using sorted = seq_cat_t<R, std::integer_sequence<R, ij>, rest_set_i_sorted>;
 			return sorted();
 		} else {
 			// i1 is good, sort I...
 			return seq_cat_t<
+				R,
 				std::integer_sequence<R, i1>,
 				decltype(seq_sort<std::integer_sequence<R, I...>>::value())
 			>();
@@ -227,7 +249,7 @@ struct seq_reverse_impl<std::integer_sequence<T, first, Rest...>> {
 	using seq_first = std::integer_sequence<T, first>;
 	using rest = std::integer_sequence<T, Rest...>;
 	using rest_reversed = typename seq_reverse_impl<rest>::type;
-	using type = Common::seq_cat_t<rest_reversed, seq_first>;
+	using type = seq_cat_t<T, rest_reversed, seq_first>;
 };
 template<typename T, T i1, T i2>
 struct seq_reverse_impl<std::integer_sequence<T, i1, i2>> {

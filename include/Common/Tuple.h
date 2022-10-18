@@ -180,6 +180,7 @@ struct TupleToSeqMapImpl;
 template<typename I, typename T, typename... Ts, template<typename> typename F>
 struct TupleToSeqMapImpl<I, std::tuple<T, Ts...>, F> {
 	using type = seq_cat_t<
+		I,
 		std::integer_sequence<I, F<T>::value>,
 		typename TupleToSeqMapImpl<I, std::tuple<Ts...>, F>::type
 	>;
@@ -214,6 +215,7 @@ struct SeqToSeqMapImpl;
 template<typename I, I i1, I... is, template<I> typename F>
 struct SeqToSeqMapImpl<std::integer_sequence<I, i1, is...>, F> {
 	using type = seq_cat_t<
+		I,
 		std::integer_sequence<I, F<i1>::value>,
 		typename SeqToSeqMapImpl<std::integer_sequence<I, is...>, F>::type
 	>;
@@ -247,6 +249,7 @@ struct tuple_get_filtered_indexes<
 	static constexpr auto value() {
 		if constexpr (F<T>::value) {
 			using has = seq_cat_t<
+				int,
 				std::integer_sequence<int, i1>,
 				typename next::has
 			>;
@@ -255,6 +258,7 @@ struct tuple_get_filtered_indexes<
 		} else {
 			using has = typename next::has;
 			using hasnot = seq_cat_t<
+				int,
 				std::integer_sequence<int, i1>,
 				typename next::hasnot
 			>;

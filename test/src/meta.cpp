@@ -41,12 +41,35 @@ namespace Test {
 
 	static_assert(
 		is_same_v<
+			seq_cat_t<int>,
+			integer_sequence<int>
+		>
+	);
+	static_assert(
+		is_same_v<
+			seq_cat_t<int, integer_sequence<int, 3,2>>,
+			integer_sequence<int, 3,2>
+		>
+	);
+	static_assert(
+		is_same_v<
 			seq_cat_t<
+				int,
 				integer_sequence<int, 1>,
 				integer_sequence<int, 2,3>
-				//integer_sequence<size_t, 2,3>	//types have to match or you get a compilererror
 			>,
 			integer_sequence<int, 1,2,3>
+		>
+	);
+	static_assert(
+		is_same_v<
+			seq_cat_t<
+				int,
+				integer_sequence<int, 1>,
+				integer_sequence<int, 2,3>,
+				integer_sequence<int, 4,5>
+			>,
+			integer_sequence<int, 1,2,3,4,5>
 		>
 	);
 
