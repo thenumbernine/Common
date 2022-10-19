@@ -2,8 +2,9 @@
 
 #include "Common/MemberPointer.h"	//MemberMethodPointer
 #include "Common/Tuple.h"	//tuple_rep_t
-#include <functional>	//function<>
-#include <tuple>		//tuple<>
+#include <functional>	//function
+#include <tuple>		//tuple
+#include <algorithm>	//transform
 
 namespace Common {
 
@@ -139,7 +140,7 @@ auto mapValues(
 	Container<ContainerT/*, ContainerParams...*/> const & container,
 	Transform && transform
 ) {
-	using DestT = std::result_of_t<Transform(ContainerT const&)>;
+	using DestT = std::invoke_result_t<Transform,ContainerT>;
 	Container<DestT/*, ContainerParams...*/> res;
 	std::transform(
 		std::begin(container),
@@ -168,18 +169,16 @@ Container<ToElem> mapValuesToMemberField(
 }
 
 template<
-	template<typename...> typename Container,
+	typename Container,
 	typename MemberMethod
 >
 auto mapValuesToMemberMethod(
-	Container<
-		typename MemberMethodPointer<MemberMethod>::Class
-	> const & from,
+	Container const & from,
 	MemberMethod fromElemMethod
 ) {
 	return mapValues(from, [fromElemMethod](
-		typename MemberMethodPointer<MemberMethod>::Class const & fromElem
-	) -> typename MemberMethodPointer<MemberMethod>::Return {
+		auto const & fromElem
+	) {
 		return (fromElem.*fromElemMethod)();
 	});
 }

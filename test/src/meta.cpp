@@ -298,10 +298,11 @@ void testForLoop() {
 	
 	using S = std::index_sequence<1,2,3>;
 	// error under clang: "constexpr function never produces a constant expression"
-	Common::for_seq_runtime<S>([](size_t i) constexpr -> bool {
-		std::cout << "for_seq_runtime " << i << "'th" << std::endl;
-		return false;
-	});
+	// error under msvc: "constexpr function 'testForLoop::<lambda_2>::operator ()' cannot result in a constant expression"
+//	Common::for_seq_runtime<S>([](size_t i) constexpr -> bool {
+//		std::cout << "for_seq_runtime " << i << "'th" << std::endl;
+//		return false;
+//	});
 
 	Common::for_seq<std::make_index_sequence<4>, ForSeqTest>();
 }
