@@ -5,6 +5,7 @@
 #include <functional>	//function
 #include <tuple>		//tuple
 #include <algorithm>	//transform
+#include <iterator>		//inserter
 
 namespace Common {
 
