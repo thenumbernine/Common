@@ -259,7 +259,7 @@ namespace Test {
 	// Lambda function detect
 	static_assert(is_same_v<
 		Common::FunctionFromLambda<decltype(
-			[](int, int, int, int, int) -> float {}
+			[](int, int, int, int, int) -> float { return {}; }
 		)>,
 		Common::FunctionFromTupleArgs<
 			float,
@@ -268,7 +268,7 @@ namespace Test {
 	>);
 	static_assert(is_same_v<
 		Common::FunctionFromLambda<decltype(
-			[]() -> float {}
+			[]() -> float { return {}; }
 		)>,
 		Common::FunctionFromTupleArgs<
 			float,
@@ -351,9 +351,9 @@ void testForLoop() {
 		return false; // false == continue, true == break
 	});
 	
-	using S = std::index_sequence<1,2,3>;
 	// error under clang: "constexpr function never produces a constant expression"
 	// error under msvc: "constexpr function 'testForLoop::<lambda_2>::operator ()' cannot result in a constant expression"
+//	using S = std::index_sequence<1,2,3>;
 //	Common::for_seq_runtime<S>([](size_t i) constexpr -> bool {
 //		std::cout << "for_seq_runtime " << i << "'th" << std::endl;
 //		return false;
@@ -441,7 +441,7 @@ int main() {
 			return 42;
 		};
 		doSomethignOnOnlyIntIntIntToFloatLambdas(f);
-		auto l = LambdaMatchTest(f);
+		LambdaMatchTest l(f);
 	
 		//auto l2 = LambdaMatchTest([]() -> float {});	//compile error
 		//auto l2 = LambdaMatchTest([](int) -> float {});	//compile error
@@ -449,6 +449,6 @@ int main() {
 		//auto l2 = LambdaMatchTest([](int, int, int, int) -> float {});	//compile error
 		//auto l2 = LambdaMatchTest([](int, int, int) -> double {});	//compile error ... tho would be nice to cast return types
 		//auto l2 = LambdaMatchTest([](int, int, int) { return 2; });	//compile error ... tho would be nice to cast return types
-		auto l2 = LambdaMatchTest([](int, int, int) { return 2.f; });	// works cuz function was deduced to be return-type float
+		LambdaMatchTest l2([](int, int, int) { return 2.f; });	// works cuz function was deduced to be return-type float
 	}
 }
