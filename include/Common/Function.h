@@ -2,6 +2,7 @@
 
 #include "Common/MemberPointer.h"	//MemberMethodPointer
 #include <tuple>
+#include <functional>
 
 namespace Common {
 
