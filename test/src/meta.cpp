@@ -245,16 +245,71 @@ namespace Test {
 		tuple<int, char*, double, short, long>
 	>);
 
+	//tuple_rep_t
+	static_assert(is_same_v<
+		tuple_rep_t<int, 5>,
+		std::tuple<int,int,int,int,int>
+	>);
+	static_assert(is_same_v<
+		tuple_rep_t<int, 0>,
+		std::tuple<>
+	>);
+
+
+	// Lambda function detect
+	static_assert(is_same_v<
+		Common::FunctionFromLambda<decltype(
+			[](int, int, int, int, int) -> float {}
+		)>,
+		Common::FunctionFromTupleArgs<
+			float,
+			tuple_rep_t<int, 5>
+		>
+	>);
+	static_assert(is_same_v<
+		Common::FunctionFromLambda<decltype(
+			[]() -> float {}
+		)>,
+		Common::FunctionFromTupleArgs<
+			float,
+			tuple_rep_t<int, 0>
+		>
+	>);
 }
 
+//compile error if fail
+template<typename Lambda>
+void doSomethignOnOnlyIntIntIntToFloatLambdas(Lambda f)
+requires (
+	std::is_same_v<
+		Common::FunctionFromLambda<Lambda>,
+		Common::FunctionFromTupleArgs<float, Common::tuple_rep_t<int, 3>>
+	>
+) {
+	float c = f(1,2,3);
+	std::cout << "success " << c << std::endl;
+}
 
+struct LambdaMatchTest {
+	template<typename Lambda>
+	LambdaMatchTest(Lambda f)
+	requires (
+		std::is_same_v<
+			Common::FunctionFromLambda<Lambda>,
+			Common::FunctionFromTupleArgs<float, Common::tuple_rep_t<int, 3>>
+		>
+	) {
+		float c = f(1,2,3);
+		std::cout << "success " << c << std::endl;
+	}
+};
 
 //for-loop
 
 template<int index>
 struct TestEq {
 	// arg here just here to prove you can pass stuff into this function
-	static bool exec(std::string const & randomarg) { 
+	static bool exec(std::string const & randomarg) {
 		TEST_EQ(randomarg, std::string("hello"));
 		using A = Common::Function<void(int, char)>::Type;
 		using B = std::tuple<int, char>;
@@ -263,7 +318,7 @@ struct TestEq {
 	}
 };
 
-template<int i> 
+template<int i>
 struct ForSeqTest {
 	static bool exec() {
 		std::cout << "for_seq " << i << std::endl;
@@ -311,7 +366,7 @@ int test(double, char) { return 0; }
 
 int main() {
 	//testing Common::Function ::numArgs and ::Arg<n>
-	{	
+	{
 		using A = Common::Function<void()>;
 		TEST_EQ(A::numArgs, 0);
 		TEST_EQ((std::is_same_v<A::Return, void>), true);
@@ -378,5 +433,22 @@ int main() {
 		}
 
 		auto u = Common::mapValuesToMemberMethod(v, &std::string::size);
+	}
+
+	{
+		auto f = [](int a, int b, int c) -> float {
+			std::cout << "within lambda with " << a << ", " << b << ", " << c << std::endl;
+			return 42;
+		};
+		doSomethignOnOnlyIntIntIntToFloatLambdas(f);
+		auto l = LambdaMatchTest(f);
+	
+		//auto l2 = LambdaMatchTest([]() -> float {});	//compile error
+		//auto l2 = LambdaMatchTest([](int) -> float {});	//compile error
+		//auto l2 = LambdaMatchTest([](int, int) -> float {});	//compile error
+		//auto l2 = LambdaMatchTest([](int, int, int, int) -> float {});	//compile error
+		//auto l2 = LambdaMatchTest([](int, int, int) -> double {});	//compile error ... tho would be nice to cast return types
+		//auto l2 = LambdaMatchTest([](int, int, int) { return 2; });	//compile error ... tho would be nice to cast return types
+		auto l2 = LambdaMatchTest([](int, int, int) { return 2.f; });	// works cuz function was deduced to be return-type float
 	}
 }
