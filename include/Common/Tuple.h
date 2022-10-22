@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Common/Sequence.h"	// Tuple/Seq stuff should either go here or in Common/Sequence.h
+#include <algorithm>			//min, max
 #include <tuple>
 #include <cstddef>	//size_t
 #include <utility>	//integer_sequence
 
 namespace Common {
-
 
 template<typename... T>
 using tuple_cat_t = decltype(std::tuple_cat(std::declval<T>()...));
@@ -68,7 +68,7 @@ using tuple_subset_t = TupleGetSeq<
 	Tuple,
 	make_index_range<
 		from,
-		std::min(std::tuple_size_v<Tuple>, std::max(from,to))
+		std::min(std::tuple_size_v<Tuple>, std::max(from, to))
 	>
 >;
 
