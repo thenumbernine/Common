@@ -32,6 +32,22 @@ using is_instance = is_instance_impl<std::decay_t<T>, U>;
 template <typename T, template <typename ...> typename U>
 constexpr bool is_instance_v = is_instance<T, U>::value;
 
+// TODO how about just a template<typename,typename> apply_all ?
+// then is_all_base_of_v<T,Ts...> = apply_all<std::is_base_of, T, Ts...>;
+template<typename T, typename... Us>
+struct is_all_base_of;
+template<typename T, typename U, typename... Us>
+struct is_all_base_of<T,U,Us...> {
+	static constexpr bool value = std::is_base_of_v<T,U>
+		&& is_all_base_of<T, Us...>::value;
+};
+template<typename T>
+struct is_all_base_of<T> {
+	static constexpr bool value = true;
+};
+template<typename T, typename... Us>
+concept is_all_base_of_v = is_all_base_of<T, Us...>::value;
+
 //https://codereview.stackexchange.com/a/208195
 template<typename U>
 struct constness_of { 
