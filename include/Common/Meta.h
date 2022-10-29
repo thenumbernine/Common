@@ -34,6 +34,7 @@ constexpr bool is_instance_v = is_instance<T, U>::value;
 
 // TODO how about just a template<typename,typename> apply_all ?
 // then is_all_base_of_v<T,Ts...> = apply_all<std::is_base_of, T, Ts...>;
+// or just use TupleToSeqMap with "is_base_of_v<T>::template uncurry" with "seq_logical_and_v"
 template<typename T, typename... Us>
 struct is_all_base_of;
 template<typename T, typename U, typename... Us>
