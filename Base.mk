@@ -76,6 +76,13 @@ LDFLAG_OUTPUT_msvc=/Fe:
 # newschool:
 #DYNAMIC_LIBS
 #STATIC_LIBS	<- haven't got this just yet
+
+# this is a list of other Base.mk - dependent libraries
+# from there you can include them into the project accordingly, via .so or .a or whatever rpath or whatever
+# I used to put this in DYNAMIC_LIBS, which are .so's, which are added as-is (as opposed to LIBS which are added in name only and rely on the OS to resolve the link path) 
+# but now I'm having DEPEND_LIBS to split off pathname and filename and insert themselves into LIBS and LIBPATHS
+DEPEND_LIBS=
+
 LIBPATHS_osx+=$(HOME)/lib
 
 DISTDIR_BASE=dist
@@ -89,12 +96,15 @@ DIST_PREFIX_linux_lib=lib
 DIST_SUFFIX_linux_lib=.so
 DIST_SUFFIX_linux_app=
 
+LIB_PREFIX=$(DIST_PREFIX_$(PLATFORM)_lib)
 LIB_SUFFIX=$(DIST_SUFFIX_$(PLATFORM)_lib)
 
 DIST=$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 
 LDFLAGS_osx_lib+=-dynamiclib -undefined suppress -flat_namespace -install_name @rpath/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)$(call buildVar,DIST_SUFFIX))
 LDFLAGS_linux_lib+=-shared
+# this is the lib sub folder off the dist location
+LDFLAGS_linux_app+= -Wl,-rpath=lib
 
 LDFLAGS_osx_app+=-Wl,-headerpad_max_install_names
 
@@ -171,11 +181,13 @@ post_builddist_$(PLATFORM): post_builddist_$(PLATFORM)_$(DIST_TYPE)
 .PHONY: post_builddist_$(PLATFORM)_$(DIST_TYPE)
 post_builddist_$(PLATFORM)_$(DIST_TYPE):: builddist
 
+# TODO for paths to be correct when linking, this has to be run after builddist
 post_builddist_linux_app::
 	-cp -R res/* $(DISTDIR)/
-	@for file in $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS); \
+	-mkdir -p $(DISTDIR)/lib
+	@for file in $(DEPEND_LIBS) $(call buildVar,DEPEND_LIBS); \
 	do \
-		cp $$file $(DISTDIR); \
+		cp $$file $(DISTDIR)/lib; \
 	done;
 
 post_builddist_osx_app::
@@ -231,8 +243,10 @@ builddist: CXXFLAGS+= $(call buildVar,CXXFLAGS)
 builddist: CXXFLAGS+= $(addprefix -I,$(INCLUDE) $(call buildVar,INCLUDE))
 builddist: CXXFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
 builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
-builddist: DEPLIBS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
+builddist: LIBS+= $(call notdir,$(DEPEND_LIBS))
+builddist: LIBPATHS+= $(call dir,$(DEPEND_LIBS))
 builddist: DEPLIBS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
+builddist: DEPLIBS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
 builddist: DEPLIBS+= $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS)
 builddist: $(DIST)
 
