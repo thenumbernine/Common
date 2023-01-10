@@ -9,6 +9,7 @@
 #define STRINGIZE_DETAIL_(v)	#v
 #define STRINGIZE(v) STRINGIZE_DETAIL_(v)
 #define LINE_STRING	STRINGIZE(__LINE__)
+#define FILE_AND_LINE __FILE__ ":" LINE_STRING
 
 //I need a unique api macro for *each project*
 //otherwise how can I determine which class apis are import and which are export ...
