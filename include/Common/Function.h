@@ -8,7 +8,7 @@ namespace Common {
 
 //function parameters
 
-template<typename Return, typename... ArgList>
+template<typename FuncType>
 struct Function;
 
 template<typename Return_, typename... ArgList>
