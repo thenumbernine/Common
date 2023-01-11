@@ -44,4 +44,16 @@ using FunctionFromTupleArgs = typename FunctionFromTupleArgsImpl<Return, TupleAr
 template<typename Lambda>
 using FunctionFromLambda = Function<typename MemberMethodPointer<decltype(&Lambda::operator())>::CFunc>;
 
+
+// wait .. shouldn't I just make this work with Function?
+// shouldn't Function accept <FuncType> by default, and then overload?
+template<typename FuncType>
+struct FunctionPointer;
+
+// TODO can I skip FunctionPointer altogether and just use Function<something_t<F>> ?
+template<typename Return_, typename... ArgList>
+struct FunctionPointer<Return_ (*)(ArgList...)> : public Function<Return_(ArgList...)> {};
+
+
+
 }
