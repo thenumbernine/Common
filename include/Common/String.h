@@ -37,13 +37,13 @@ constexpr bool has_dontUseFieldsOStream_v = requires(T const & t) { T::dontUseFi
 
 /*
 Allow a default ostream operator<< for objects that have the member function 'to_ostream(ostream& o) const'
-TODO hmm why isn't it working? failing for Tensor::_vec::iterator
+TODO hmm why isn't it working? failing for Tensor::vec::iterator
 
 Wait isn't namespace operator resolve need this to be defined in the same namespace as whatever is using it?
 and if that's true, then making a templated version of this function seems kinda pointless / counter-productive.
 
 Ok now I'm asking why do this, because providing a member to_ostream is probably more rigid than just providing an overload of operator<<(ostream)
-and the reason I can think of is what about templated nested classes and code organization, putting the templated nested class ostream method inside/next to the class rather than half way down the file (_vec::ReadIterator)
+and the reason I can think of is what about templated nested classes and code organization, putting the templated nested class ostream method inside/next to the class rather than half way down the file (vec::ReadIterator)
 */
 template<typename T>
 requires Common::has_to_ostream_v<T>
