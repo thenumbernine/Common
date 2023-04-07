@@ -278,4 +278,22 @@ constexpr T seq_logical_and(std::integer_sequence<T, Args...> = {}) {
 	return (Args && ... && (true));
 }
 
+// assumes F<I>::value produces Seq::value_type
+template<typename Seq, template<typename Seq::value_type> typename F>
+struct SeqToSeqMapImpl;
+template<typename I, I i1, I... is, template<I> typename F>
+struct SeqToSeqMapImpl<std::integer_sequence<I, i1, is...>, F> {
+	using type = seq_cat_t<
+		I,
+		std::integer_sequence<I, F<i1>::value>,
+		typename SeqToSeqMapImpl<std::integer_sequence<I, is...>, F>::type
+	>;
+};
+template<typename I, template<I> typename F>
+struct SeqToSeqMapImpl<std::integer_sequence<I>, F> {
+	using type = std::integer_sequence<I>;
+};
+template<typename Seq, template<typename Seq::value_type> typename F>
+using SeqToSeqMap = typename SeqToSeqMapImpl<Seq, F>::type;
+
 }

@@ -209,25 +209,6 @@ struct SeqToTupleMapImpl<std::integer_sequence<I>, F> {
 template<typename Seq, template<typename Seq::value_type> typename F>
 using SeqToTupleMap = typename SeqToTupleMapImpl<Seq, F>::type;
 
-// assumes F<I>::value produces Seq::value_type
-template<typename Seq, template<typename Seq::value_type> typename F>
-struct SeqToSeqMapImpl;
-template<typename I, I i1, I... is, template<I> typename F>
-struct SeqToSeqMapImpl<std::integer_sequence<I, i1, is...>, F> {
-	using type = seq_cat_t<
-		I,
-		std::integer_sequence<I, F<i1>::value>,
-		typename SeqToSeqMapImpl<std::integer_sequence<I, is...>, F>::type
-	>;
-};
-template<typename I, template<I> typename F>
-struct SeqToSeqMapImpl<std::integer_sequence<I>, F> {
-	using type = std::integer_sequence<I>;
-};
-template<typename Seq, template<typename Seq::value_type> typename F>
-using SeqToSeqMap = typename SeqToSeqMapImpl<Seq, F>::type;
-
-
 // F<T>::value is a bool for yes or no to add to 'has' or 'hasnot'
 template<typename Tuple, typename indexSeq, template<typename> typename F>
 struct tuple_get_filtered_indexes;
