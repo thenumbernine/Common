@@ -240,7 +240,7 @@ constexpr bool for_seq(Args && ... args) {
 	return for_seq_impl<T, F, Args...>::exec(std::forward<Args>(args)...);
 }
 
-// sequence reverse 
+// sequence reverse
 
 template<typename T>
 struct seq_reverse_impl;
@@ -263,7 +263,30 @@ template<typename T>
 using seq_reverse_t = typename seq_reverse_impl<T>::type;
 
 
-// TODO for all operations 
+template<typename T>
+struct seq_pop_back : public seq_reverse_impl<seq_pop_front_t<seq_reverse_t<T>>> {};
+template<typename T>
+using seq_pop_back_t = typename seq_pop_back<T>::type;
+
+// apply a sequence to a templated type which accepts it
+template<
+	typename Seq,
+	template<auto ...> typename T
+>
+struct seq_apply;
+template<
+	typename I,
+	template<I...> typename T,
+	I... is
+>
+struct seq_apply<std::integer_sequence<I, is...>, T> {
+	using type = T<is...>;
+};
+template<typename Seq, template<auto...> typename T>
+using seq_apply_t = typename seq_apply<Seq, T>::type;
+
+
+// TODO for all operations
 //https://stackoverflow.com/a/55247213
 template<typename T, T... Args>
 constexpr T seq_plus(std::integer_sequence<T, Args...> = {}) {
