@@ -67,11 +67,13 @@ From = std::vector<std::string>
 From::value_type = std::string
 To = std::vector<size_t>
 To::value_type = size_t
+
+TODO put To First because that's explicit as the return-type.  From can be inferred from the arg.
 */
-template<typename From, typename To>
+template<typename To, typename From, typename Lambda>
 To mapElems(
 	From const & from,
-	std::function<typename To::value_type(typename From::value_type)> f
+	Lambda const & f
 ) {
 	To to;
 #if 0	//won't work with map
@@ -92,7 +94,7 @@ To mapElems(
 
 //There are probably better things for me to do with my time ...
 
-template<typename From, typename To>
+template<typename To, typename From>
 To mapElemsToMemberField(
 	From const & from,
 	typename To::value_type From::value_type::*fromElemField
@@ -118,7 +120,7 @@ To mapElemsToMemberField(
 	return to;
 }
 
-template<typename From, typename To>
+template<typename To, typename From>
 To mapElemsToMemberMethod(
 	From const & from,
 	typename To::value_type (From::value_type::*fromElemMethod)() const

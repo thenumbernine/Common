@@ -399,18 +399,15 @@ int main() {
 
 		//doesn't know return container template, so can't auto-deduce
 		auto x = Common::mapElems<
-			std::vector<std::string>,
 			std::vector<size_t>
 		>(v, [](std::string const & s) -> size_t { return s.size(); });
 
 		auto w = Common::mapElemsToMemberMethod<
-			std::vector<std::string>,
 			std::vector<size_t>
 		>(v, &std::string::size);
 
 		// but on the plus side, you can map to new containers
 		auto m = Common::mapElems<
-			std::vector<std::string>,
 			std::map<std::string, size_t>
 		>(
 			v,
