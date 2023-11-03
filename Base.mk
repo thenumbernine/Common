@@ -243,14 +243,19 @@ builddist: CXXFLAGS+= $(call buildVar,CXXFLAGS)
 builddist: CXXFLAGS+= $(addprefix -I,$(INCLUDE) $(call buildVar,INCLUDE))
 builddist: CXXFLAGS+= $(addprefix -D,$(MACROS) $(call buildVar,MACROS))
 builddist: LDFLAGS+= $(call buildVar,LDFLAGS)
-builddist: LIBS+= $(call notdir,$(DEPEND_LIBS))
+
+# Chris: was this ever working?
+builddist: LIBS+= $(patsubst lib%, %, $(patsubst %.so, %, $(call notdir,$(DEPEND_LIBS))))
 builddist: LIBPATHS+= $(call dir,$(DEPEND_LIBS))
+# Chris: instead
+#builddist: LDFLAGS+= $(DEPEND_LIBS)
+
 builddist: DEPLIBS+= $(addprefix -L,$(LIBPATHS) $(call buildVar,LIBPATHS))
 builddist: DEPLIBS+= $(addprefix -l,$(LIBS) $(call buildVar,LIBS))
 builddist: DEPLIBS+= $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS)
 builddist: $(DIST)
 
-#builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
+builddist: LDFLAGS+= $(realpath $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS))
 
 $(OBJDIR)/%.o : $(SRCDIR_BASE)/%.cpp $(foreach file,$(INCLUDE), $(shell $(FIND) $(file) -type f))
 	-mkdir -p $(@D)
