@@ -182,8 +182,9 @@ post_builddist_$(PLATFORM): post_builddist_$(PLATFORM)_$(DIST_TYPE)
 post_builddist_$(PLATFORM)_$(DIST_TYPE):: builddist
 
 # TODO for paths to be correct when linking, this has to be run after builddist
+# notice it used to just use -cp -R res/* $(DISTDIR)/, but rsync is faster, but what if there's side effects to the change.
 post_builddist_linux_app::
-	-cp -R res/* $(DISTDIR)/
+	-$(call copyTreeOfType,*,res,$(DISTDIR))
 	-mkdir -p $(DISTDIR)/lib
 	@for file in $(DEPEND_LIBS) $(call buildVar,DEPEND_LIBS); \
 	do \
@@ -226,7 +227,7 @@ post_builddist_osx_app::
 	@echo '</plist>' >> $(dir $(DIST))../Info.plist
 	
 	-mkdir -p $(dir $(DIST))../Resources/lib
-	-cp -R res/* $(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)).app/Contents/Resources/
+	-$(call copyTreeOfType,*,res,$(DISTDIR)/$(call concat,$(call buildVar,DIST_PREFIX)$(DIST_FILENAME)).app/Contents/Resources/)
 	@for file in $(DYNAMIC_LIBS) $(call buildVar,DYNAMIC_LIBS); \
 	do \
 		cp $$file $(dir $(DIST))../Resources/lib; \
