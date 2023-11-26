@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/MemberPointer.h"	//MemberMethodPointer
+//#include "Common/MemberPointer.h"	//MemberMethodPointer
 #include "Common/Tuple.h"	//tuple_rep_t
 #include <functional>	//function
 #include <tuple>		//tuple
