@@ -45,7 +45,6 @@ namespace File {
 	}
 	
 	void write(std::filesystem::path const & filename, std::string const & data);
-	std::string getExtension(std::filesystem::path const & filename);
 	bool exists(std::filesystem::path const & filename);
 	void remove(std::filesystem::path const & filename);
 }
