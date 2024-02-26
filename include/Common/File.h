@@ -1,9 +1,10 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
 #include <fstream>
 #include <vector>
-#include "Exception.h"
+#include "Common/Exception.h"
 
 namespace Common {
 namespace File {
@@ -13,7 +14,7 @@ namespace File {
 	//static Result read(std::string const & filename);
 	//inline std::string read<std::string>(std::string const & filename) {
 	// but instead I'm stuck with ...
-	inline std::string read(std::string const & filename) {
+	inline std::string read(std::filesystem::path const & filename) {
 		std::ifstream f(filename);
 		if (!f.good()) throw Common::Exception() << "failed to open file " << filename;
 		f.seekg(0, f.end);
@@ -28,11 +29,12 @@ namespace File {
 	}
 
 	template<typename T>
-	inline std::vector<T> readAsVector(std::string const & filename) {
+	inline std::vector<T> readAsVector(std::filesystem::path const & filename) {
 		std::ifstream f(filename);
 		if (!f.good()) throw Common::Exception() << "failed to open file " << filename;
 		f.seekg(0, f.end);
 		size_t len = f.tellg();
+		if (len % sizeof(T) != 0) throw Common::Exception() << "this file size " << len << " does not align with the size of the struct you are reading: " << sizeof(T);
 		f.seekg(0, f.beg);
 		
 		std::vector<T> result(len);
@@ -42,9 +44,9 @@ namespace File {
 		return result;
 	}
 	
-	void write(const std::string& filename, const std::string& data);
-	std::string getExtension(const std::string& filename);
-	bool exists(const std::string& filename);
-	void remove(const std::string& filename);
+	void write(std::filesystem::path const & filename, std::string const & data);
+	std::string getExtension(std::filesystem::path const & filename);
+	bool exists(std::filesystem::path const & filename);
+	void remove(std::filesystem::path const & filename);
 }
 }
