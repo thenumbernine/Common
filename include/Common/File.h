@@ -39,7 +39,7 @@ namespace File {
 		
 		std::vector<T> result(len / sizeof(T));
 		
-		f.read(result.data(), len);
+		f.read((char*)result.data(), len);
 		
 		return result;
 	}
