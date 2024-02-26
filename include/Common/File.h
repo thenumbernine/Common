@@ -37,7 +37,7 @@ namespace File {
 		if (len % sizeof(T) != 0) throw Common::Exception() << "this file size " << len << " does not align with the size of the struct you are reading: " << sizeof(T);
 		f.seekg(0, f.beg);
 		
-		std::vector<T> result(len);
+		std::vector<T> result(len / sizeof(T));
 		
 		f.read(result.data(), len);
 		
