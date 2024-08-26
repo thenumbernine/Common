@@ -14,7 +14,7 @@ bool exists(std::filesystem::path const & filename) {
 }
 
 void remove(std::filesystem::path const & filename) {
-	std::remove(filename.c_str());
+	std::filesystem::remove(filename);
 }
 
 }
