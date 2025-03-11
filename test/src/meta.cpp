@@ -4,6 +4,7 @@
 #include "Common/Sequence.h"
 #include "Common/Function.h"
 #include "Common/ForLoop.h"
+#include "Common/File.h"
 #include <iostream>
 #include <type_traits>
 #include <map>
@@ -447,5 +448,13 @@ int main() {
 		//auto l2 = LambdaMatchTest([](int, int, int) -> double {});	//compile error ... tho would be nice to cast return types
 		//auto l2 = LambdaMatchTest([](int, int, int) { return 2; });	//compile error ... tho would be nice to cast return types
 		LambdaMatchTest l2([](int, int, int) { return 2.f; });	// works cuz function was deduced to be return-type float
+	}
+
+	{
+		std::filesystem::path fp("tmp");
+		std::string test = "test";
+		Common::File::write(fp, test);
+		std::cout << Common::File::read(fp) << std::endl;
+		std::vector<char> tmp = Common::File::readAsVector<char>(fp);
 	}
 }

@@ -8,44 +8,49 @@
 
 namespace Common {
 namespace File {
-	
-	//I would like return template specializatoin ...
-	//template<typename Result = std::string>
-	//static Result read(std::string const & filename);
-	//inline std::string read<std::string>(std::string const & filename) {
-	// but instead I'm stuck with ...
-	inline std::string read(std::filesystem::path const & filename) {
-		std::ifstream f(filename);
-		if (!f.good()) throw Common::Exception() << "failed to open file " << filename;
+
+	inline auto readRaw(
+		std::filesystem::path const & filepath,
+		auto createStorage,
+		auto getStoragePtr,
+		auto getResult // = [](auto & buf) -> std::decay_t<decltype(buf)> { return buf; } // when using defaults I get an error ... couldn't infer ...
+	) {
+		std::ifstream f(filepath);
+		if (!f.good()) throw Common::Exception() << "failed to open file " << filepath;
+
 		f.seekg(0, f.end);
-		size_t len = f.tellg();
+		size_t size = f.tellg();
 		f.seekg(0, f.beg);
-		
-		std::vector<char> buf(len);
-		
-		f.read(&buf[0], len);
-		
-		return std::string(buf.begin(), buf.end());
+
+		auto storage = createStorage(size);
+		f.read(getStoragePtr(storage), size);
+		return getResult(storage);
+	}
+
+	inline std::string read(std::filesystem::path const & filepath) {
+		return readRaw(
+			filepath,
+			[](size_t size) { return std::vector<char>(size); },
+			[](auto & buf) { return buf.data(); },
+			[](auto & buf) { return std::string(buf.begin(), buf.end()); }
+		);
 	}
 
 	template<typename T>
-	inline std::vector<T> readAsVector(std::filesystem::path const & filename) {
-		std::ifstream f(filename);
-		if (!f.good()) throw Common::Exception() << "failed to open file " << filename;
-		f.seekg(0, f.end);
-		size_t len = f.tellg();
-		if (len % sizeof(T) != 0) throw Common::Exception() << "this file size " << len << " does not align with the size of the struct you are reading: " << sizeof(T);
-		f.seekg(0, f.beg);
-		
-		std::vector<T> result(len / sizeof(T));
-		
-		f.read((char*)result.data(), len);
-		
-		return result;
+	inline std::vector<T> readAsVector(std::filesystem::path const & filepath) {
+		return readRaw(
+			filepath,
+			[](size_t size) {
+				if (size % sizeof(T) != 0) throw Common::Exception() << "this file size " << size << " does not align with the size of the struct you are reading: " << sizeof(T);
+				return std::vector<T>(size / sizeof(T));
+			},
+			[](auto & buf) { return reinterpret_cast<char*>(buf.data()); },
+			[](auto & buf) -> std::decay_t<decltype(buf)> { return buf; }
+		);
 	}
-	
-	void write(std::filesystem::path const & filename, std::string const & data);
-	bool exists(std::filesystem::path const & filename);
-	void remove(std::filesystem::path const & filename);
+
+	void write(std::filesystem::path const & filepath, std::string const & data);
+	bool exists(std::filesystem::path const & filepath);
+	void remove(std::filesystem::path const & filepath);
 }
 }
